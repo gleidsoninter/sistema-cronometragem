@@ -1,0 +1,55 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.dll
+*.exe
+*.pdb
+# MAUI específico
+**/Android/**/[Oo]bj/
+**/Android/**/[Bb]in/
+**/iOS/**/[Oo]bj/
+**/iOS/**/[Bb]in/
+# Arquivos de configuração sensíveis
+appsettings.Development.json
+appsettings.Production.json
+**/secrets.json
+*.env
+
+# Database local
+*.db
+*.sqlite
+*.sqlite3
+
+# Android
+*.apk
+*.aab
+*.dex
+local.properties
+
+# OS files
+.DS_Store
+Thumbs.db
+# IDEs
+.vscode/
+.idea/
+
+# Logs
+*.log
+# Temporary files
+*.tmp
+*~
