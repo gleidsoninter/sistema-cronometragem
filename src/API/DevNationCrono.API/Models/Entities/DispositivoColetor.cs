@@ -15,68 +15,55 @@ public class DispositivoColetor
     [Required]
     public int IdEtapa { get; set; }
 
-    /// <summary>
-    /// Nome identificador do dispositivo (Ex: "Celular Largada 1")
-    /// </summary>
     [Required]
     [MaxLength(100)]
-    public string Nome { get; set; }
+    public string Nome { get; set; } // Ex: "Coletor Especial 1 - Entrada"
 
-    /// <summary>
-    /// Valores: 'ENTRADA', 'SAIDA', 'PASSAGEM'
-    /// </summary>
     [Required]
-    [MaxLength(20)]
-    public string Tipo { get; set; }
+    [MaxLength(1)]
+    public string Tipo { get; set; } // E, S, P
 
     /// <summary>
-    /// Para Enduro: ID da especial que este dispositivo monitora.
+    /// Qual especial este coletor monitora (ENDURO)
     /// </summary>
     public int? IdEspecial { get; set; }
 
     /// <summary>
-    /// ID único do hardware (Android ID ou UUID)
+    /// Identificador único do dispositivo Android
     /// </summary>
     [Required]
-    [MaxLength(255)]
+    [MaxLength(100)]
     public string DeviceId { get; set; }
 
-    [MaxLength(100)]
-    public string? Modelo { get; set; }
-
-    [MaxLength(20)]
-    public string? VersaoApp { get; set; }
-
     /// <summary>
-    /// Token JWT para autenticação do dispositivo na API
+    /// Token JWT específico deste dispositivo
     /// </summary>
-    [Required]
     [MaxLength(500)]
-    public string Token { get; set; }
+    public string? Token { get; set; }
 
     public DateTime? UltimaConexao { get; set; }
 
-    public DateTime? UltimaSincronizacao { get; set; }
-
-    public int LeiturasPendentes { get; set; } = 0;
-
-    /// <summary>
-    /// Valores: 'ONLINE', 'OFFLINE', 'INATIVO'
-    /// </summary>
     [MaxLength(20)]
     public string StatusConexao { get; set; } = "OFFLINE";
+    // ONLINE, OFFLINE, SINCRONIZANDO
+
+    /// <summary>
+    /// Última leitura enviada por este dispositivo
+    /// </summary>
+    public DateTime? UltimaLeitura { get; set; }
+
+    public int TotalLeituras { get; set; } = 0;
 
     public bool Ativo { get; set; } = true;
 
-    public DateTime DataCadastro { get; set; } = DateTime.UtcNow;
+    public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
 
-    public DateTime DataAtualizacao { get; set; } = DateTime.UtcNow;
-
-    // --- Propriedades de Navegação ---
-
+    // Navegação
     [ForeignKey("IdEvento")]
     public virtual Evento Evento { get; set; }
 
     [ForeignKey("IdEtapa")]
     public virtual Etapa Etapa { get; set; }
+
+    public virtual ICollection<Tempo> Tempos { get; set; }
 }

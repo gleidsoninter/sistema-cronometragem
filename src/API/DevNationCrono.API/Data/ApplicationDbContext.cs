@@ -94,9 +94,9 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Timestamp)
                 .HasPrecision(3);
 
-            // Decimal para tempo calculado
-            entity.Property(e => e.TempoCalculado)
-                .HasPrecision(10, 3);
+            //// Decimal para tempo calculado
+            //entity.Property(e => e.TempoCalculado)
+            //    .HasPrecision(10, 3);
         });
     }
 }

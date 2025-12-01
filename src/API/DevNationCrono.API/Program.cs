@@ -101,6 +101,9 @@ builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IEtapaRepository, EtapaRepository>();
 builder.Services.AddScoped<IInscricaoRepository, InscricaoRepository>();
 builder.Services.AddScoped<IPagamentoRepository, PagamentoRepository>();
+builder.Services.AddScoped<ITempoRepository, TempoRepository>();
+builder.Services.AddScoped<IDispositivoColetorRepository, DispositivoColetorRepository>();
+
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IPilotoService, PilotoService>();
 builder.Services.AddScoped<IModalidadeService, ModalidadeService>();
@@ -108,6 +111,10 @@ builder.Services.AddScoped<IEventoService, EventoService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IEtapaService, EtapaService>();
 builder.Services.AddScoped<IInscricaoService, InscricaoService>();
+builder.Services.AddScoped<ICronometragemService, CronometragemService>();
+builder.Services.AddScoped<IResultadoEnduroService, ResultadoEnduroService>();
+builder.Services.AddScoped<IResultadoCircuitoService, ResultadoCircuitoService>();
+
 
 if (pagamentoSettings?.GatewayAtivo == "Asaas")
 {
@@ -117,6 +124,14 @@ else
 {
     builder.Services.AddHttpClient<IPagamentoService, MercadoPagoService>();
 }
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "CronometragemCache_";
+});
+
+builder.Services.AddMemoryCache();
 
 builder.Services.AddHostedService<VerificacaoPagamentosJob>();
 

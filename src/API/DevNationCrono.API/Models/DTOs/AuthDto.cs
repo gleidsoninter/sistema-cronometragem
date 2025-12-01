@@ -34,8 +34,8 @@ public class RegisterColetorDto
     public string? VersaoApp { get; set; }
 }
 
-public class ColetorLoginDto
-{
-    public string DeviceId { get; set; }
-    public string Token { get; set; } // Token temporário de registro
-}
+//public class ColetorLoginDto
+//{
+//    public string DeviceId { get; set; }
+//    public string Token { get; set; } // Token temporário de registro
+//}
