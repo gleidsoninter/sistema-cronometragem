@@ -175,7 +175,7 @@ public class EtapaService : IEtapaService
         else if (tipoCronometragem == "CIRCUITO")
         {
             if (dto.DuracaoCorridaMinutos.HasValue)
-                etapa.DuracaoCorridaMinutos = dto.DuracaoCorridaMinutos.Value;
+                etapa.TempoProvaMinutos = dto.DuracaoCorridaMinutos.Value;
 
             if (dto.VoltasAposTempoMinimo.HasValue)
                 etapa.VoltasAposTempoMinimo = dto.VoltasAposTempoMinimo.Value;
@@ -346,12 +346,12 @@ public class EtapaService : IEtapaService
             NumeroEtapa = etapa.NumeroEtapa,
             Nome = etapa.Nome,
             DataHora = etapa.DataHora,
-            NumeroEspeciais = etapa.NumeroEspeciais,
-            NumeroVoltas = etapa.NumeroVoltas,
+            NumeroEspeciais = etapa.NumeroEspeciais ?? 0,
+            NumeroVoltas = etapa.NumeroVoltas ?? 0,
             PrimeiraVoltaValida = etapa.PrimeiraVoltaValida,
-            PenalidadePorFaltaSegundos = etapa.PenalidadePorFaltaSegundos,
-            PenalidadeFormatada = FormatarTempo(etapa.PenalidadePorFaltaSegundos),
-            DuracaoCorridaMinutos = etapa.DuracaoCorridaMinutos,
+            PenalidadePorFaltaSegundos = etapa.PenalidadePorFaltaSegundos ?? 0,
+            PenalidadeFormatada = FormatarTempo(etapa.PenalidadePorFaltaSegundos ?? 0),
+            DuracaoCorridaMinutos = etapa.TempoProvaMinutos,
             VoltasAposTempoMinimo = etapa.VoltasAposTempoMinimo,
             Status = etapa.Status,
             Observacoes = etapa.Observacoes,

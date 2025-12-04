@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell x:Class="MotoTimingApp.Mobile.AppShell"
+       xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:pages="clr-namespace:MotoTimingApp.Mobile.Views.Pages"
+       FlyoutBehavior="Disabled"
+       Shell.BackgroundColor="{StaticResource Primary}"
+       Shell.ForegroundColor="White"
+       Shell.TitleColor="White"
+       Shell.TabBarBackgroundColor="{StaticResource Surface}"
+       Shell.TabBarForegroundColor="{StaticResource Primary}"
+       Shell.TabBarUnselectedColor="{StaticResource TextSecondary}"
+       Shell.TabBarTitleColor="{StaticResource Primary}">
+
+    <!-- ============================================ -->
+    <!-- FLUXO DE AUTENTICAÇÃO (sem TabBar)          -->
+    <!-- ============================================ -->
+
+    <ShellContent Route="login"
+                  ContentTemplate="{DataTemplate pages:LoginPage}"
+                  Shell.TabBarIsVisible="False"
+                  Shell.NavBarIsVisible="False" />
+
+    <ShellContent Route="cadastro"
+                  ContentTemplate="{DataTemplate pages:CadastroPage}"
+                  Shell.TabBarIsVisible="False" />
+
+    <ShellContent Route="recuperar-senha"
+                  ContentTemplate="{DataTemplate pages:RecuperarSenhaPage}"
+                  Shell.TabBarIsVisible="False" />
+
+    <!-- ============================================ -->
+    <!-- APP PRINCIPAL (com TabBar)                   -->
+    <!-- ============================================ -->
+
+    <TabBar Route="main">
+
+        <!-- Tab: Início -->
+        <Tab Title="Início" Icon="icon_home.png">
+            <ShellContent Route="home"
+                          ContentTemplate="{DataTemplate pages:HomePage}" />
+        </Tab>
+
+        <!-- Tab: Eventos -->
+        <Tab Title="Eventos" Icon="icon_calendar.png">
+            <ShellContent Route="eventos"
+                          ContentTemplate="{DataTemplate pages:EventosPage}" />
+        </Tab>
+
+        <!-- Tab: Resultados -->
+        <Tab Title="Resultados" Icon="icon_trophy.png">
+            <ShellContent Route="resultados"
+                          ContentTemplate="{DataTemplate pages:ResultadosPage}" />
+        </Tab>
+
+        <!-- Tab: Perfil -->
+        <Tab Title="Perfil" Icon="icon_profile.png">
+            <ShellContent Route="perfil"
+                          ContentTemplate="{DataTemplate pages:PerfilPage}" />
+        </Tab>
+
+    </TabBar>
+
+</Shell>

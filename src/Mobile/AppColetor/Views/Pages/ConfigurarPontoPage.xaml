@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AppColetor.ViewModels"
+             x:Class="AppColetor.Views.Pages.ConfigurarPontoPage"
+             x:DataType="vm:ConfigurarPontoViewModel"
+             Title="Configurar Ponto de Leitura">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- Cabeçalho -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="📍 IDENTIFICAÇÃO DO PONTO"
+                           Style="{StaticResource LabelTitulo}" />
+                    <Label Text="Configure este dispositivo para um ponto específico de leitura"
+                           Style="{StaticResource LabelMuted}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Seleção de Etapa -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Etapa" FontAttributes="Bold" />
+
+                    <Picker ItemsSource="{Binding Etapas}"
+                            SelectedItem="{Binding EtapaSelecionada}"
+                            ItemDisplayBinding="{Binding Nome}"
+                            Title="Selecione a etapa" />
+
+                    <Label Text="{Binding EtapaSelecionada.NomeEvento}"
+                           Style="{StaticResource LabelMuted}"
+                           IsVisible="{Binding EtapaSelecionada, Converter={StaticResource NullToBoolConverter}}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Tipo de Ponto -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Tipo de Ponto" FontAttributes="Bold" />
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" 
+                          ColumnSpacing="8" RowSpacing="8">
+
+                        <Button Grid.Row="0" Grid.Column="0"
+                                Text="🏁 Largada"
+                                Command="{Binding SelecionarTipoCommand}"
+                                CommandParameter="LARGADA"
+                                Style="{Binding TipoSelecionado, Converter={StaticResource TipoButtonStyleConverter}, ConverterParameter=LARGADA}" />
+
+                        <Button Grid.Row="0" Grid.Column="1"
+                                Text="🎯 Chegada"
+                                Command="{Binding SelecionarTipoCommand}"
+                                CommandParameter="CHEGADA"
+                                Style="{Binding TipoSelecionado, Converter={StaticResource TipoButtonStyleConverter}, ConverterParameter=CHEGADA}" />
+
+                        <Button Grid.Row="1" Grid.Column="0"
+                                Text="▶️ Entrada"
+                                Command="{Binding SelecionarTipoCommand}"
+                                CommandParameter="ENTRADA"
+                                Style="{Binding TipoSelecionado, Converter={StaticResource TipoButtonStyleConverter}, ConverterParameter=ENTRADA}" />
+
+                        <Button Grid.Row="1" Grid.Column="1"
+                                Text="⏹️ Saída"
+                                Command="{Binding SelecionarTipoCommand}"
+                                CommandParameter="SAIDA"
+                                Style="{Binding TipoSelecionado, Converter={StaticResource TipoButtonStyleConverter}, ConverterParameter=SAIDA}" />
+
+                        <Button Grid.Row="2" Grid.Column="0"
+                                Text="📍 Passagem"
+                                Command="{Binding SelecionarTipoCommand}"
+                                CommandParameter="PASSAGEM"
+                                Style="{Binding TipoSelecionado, Converter={StaticResource TipoButtonStyleConverter}, ConverterParameter=PASSAGEM}" />
+
+                        <Button Grid.Row="2" Grid.Column="1"
+                                Text="⏸️ Concentração"
+                                Command="{Binding SelecionarTipoCommand}"
+                                CommandParameter="CONCENTRACAO"
+                                Style="{Binding TipoSelecionado, Converter={StaticResource TipoButtonStyleConverter}, ConverterParameter=CONCENTRACAO}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Seleção de Especial (se aplicável) -->
+            <Frame Style="{StaticResource CardFrame}"
+                   IsVisible="{Binding MostrarEspeciais}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Especial" FontAttributes="Bold" />
+
+                    <Picker ItemsSource="{Binding Especiais}"
+                            SelectedItem="{Binding EspecialSelecionado}"
+                            ItemDisplayBinding="{Binding Nome}"
+                            Title="Selecione o especial" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Nome Amigável -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Nome do Coletor" FontAttributes="Bold" />
+
+                    <Entry Text="{Binding NomeColetor}"
+                           Placeholder="Ex: Especial 1 - Entrada" />
+
+                    <Label Text="Este nome aparecerá no monitoramento"
+                           Style="{StaticResource LabelMuted}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Resumo da Configuração -->
+            <Frame Style="{StaticResource CardFrame}"
+                   BackgroundColor="{StaticResource BackgroundLight}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="📋 RESUMO" FontAttributes="Bold" />
+
+                    <Grid ColumnDefinitions="Auto,*" RowSpacing="4" ColumnSpacing="12">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Device ID:" Style="{StaticResource LabelMuted}" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding DeviceIdPreview}" FontAttributes="Bold" />
+
+                        <Label Grid.Row="1" Grid.Column="0" Text="Tipo:" Style="{StaticResource LabelMuted}" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding TipoSelecionado}" />
+
+                        <Label Grid.Row="2" Grid.Column="0" Text="Etapa:" Style="{StaticResource LabelMuted}" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding EtapaSelecionada.Nome}" />
+
+                        <Label Grid.Row="3" Grid.Column="0" Text="Especial:" Style="{StaticResource LabelMuted}" 
+                               IsVisible="{Binding EspecialSelecionado, Converter={StaticResource NullToBoolConverter}}" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="{Binding EspecialSelecionado.Nome}"
+                               IsVisible="{Binding EspecialSelecionado, Converter={StaticResource NullToBoolConverter}}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Senha de Registro -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="🔐 Senha de Registro" FontAttributes="Bold" />
+
+                    <Entry Text="{Binding SenhaRegistro}"
+                           Placeholder="Senha fornecida pelo organizador"
+                           IsPassword="True" />
+
+                    <Label Text="Esta senha é necessária para registrar o coletor no servidor"
+                           Style="{StaticResource LabelMuted}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Botões de Ação -->
+            <Button Text="✅ REGISTRAR E CONFIGURAR"
+                    Command="{Binding RegistrarCommand}"
+                    Style="{StaticResource ButtonSuccess}"
+                    HeightRequest="60"
+                    FontSize="18"
+                    IsEnabled="{Binding PodeRegistrar}" />
+
+            <Button Text="Cancelar"
+                    Command="{Binding CancelarCommand}"
+                    Style="{StaticResource ButtonOutline}" />
+
+            <!-- Status -->
+            <Label Text="{Binding StatusMessage}"
+                   HorizontalTextAlignment="Center"
+                   IsVisible="{Binding StatusMessage, Converter={StaticResource StringToBoolConverter}}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

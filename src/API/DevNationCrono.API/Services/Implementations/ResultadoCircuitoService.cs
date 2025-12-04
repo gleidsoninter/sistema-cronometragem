@@ -14,6 +14,7 @@ public class ResultadoCircuitoService : IResultadoCircuitoService
     private readonly IInscricaoRepository _inscricaoRepository;
     private readonly IMemoryCache _cache;
     private readonly ILogger<ResultadoCircuitoService> _logger;
+    private readonly INotificacaoTempoRealService _notificacaoService;
 
     // Cache curto para tempo real
     private static readonly TimeSpan CACHE_TEMPO_REAL = TimeSpan.FromSeconds(5);
@@ -718,6 +719,8 @@ public class ResultadoCircuitoService : IResultadoCircuitoService
 
         _logger.LogInformation("Prova iniciada: Etapa {Id} às {Hora}", dto.IdEtapa, etapa.HoraLargada);
 
+        await _notificacaoService.NotificarLargadaAsync(dto.IdEtapa, etapa.HoraLargada.Value);
+
         return await GetStatusProvaAsync(dto.IdEtapa);
     }
 
@@ -741,6 +744,8 @@ public class ResultadoCircuitoService : IResultadoCircuitoService
 
         _logger.LogInformation("Bandeira: Etapa {Id} às {Hora}", dto.IdEtapa, etapa.HoraBandeira);
 
+        await _notificacaoService.NotificarBandeiraAsync(dto.IdEtapa, etapa.HoraBandeira.Value);
+
         return await GetStatusProvaAsync(dto.IdEtapa);
     }
 
@@ -756,6 +761,8 @@ public class ResultadoCircuitoService : IResultadoCircuitoService
         await InvalidarCacheAsync(idEtapa);
 
         _logger.LogInformation("Prova finalizada: Etapa {Id}", idEtapa);
+
+        await _notificacaoService.NotificarFimProvaAsync(idEtapa);
 
         return await GetStatusProvaAsync(idEtapa);
     }

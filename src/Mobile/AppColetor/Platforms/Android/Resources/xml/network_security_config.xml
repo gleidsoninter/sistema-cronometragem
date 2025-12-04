@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+	<!-- Permitir HTTP em desenvolvimento (produção deve usar HTTPS) -->
+	<base-config cleartextTrafficPermitted="true">
+		<trust-anchors>
+			<certificates src="system" />
+		</trust-anchors>
+	</base-config>
+
+	<!-- Domínios específicos (ajustar conforme necessário) -->
+	<domain-config cleartextTrafficPermitted="true">
+		<domain includeSubdomains="true">10.0.2.2</domain>
+		<!-- Emulador -->
+		<domain includeSubdomains="true">localhost</domain>
+		<domain includeSubdomains="true">192.168.</domain>
+		<!-- Rede local -->
+	</domain-config>
+</network-security-config>

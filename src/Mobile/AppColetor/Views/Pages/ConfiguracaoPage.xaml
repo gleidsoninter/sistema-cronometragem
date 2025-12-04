@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AppColetor.ViewModels"
+             x:Class="AppColetor.Views.Pages.ConfiguracaoPage"
+             x:DataType="vm:ConfiguracaoViewModel"
+             Title="Configurações">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- SEÇÃO: ETAPA -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="📍 ETAPA" Style="{StaticResource LabelSubtitulo}" />
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" 
+                          ColumnSpacing="12" RowSpacing="8">
+
+                        <Label Grid.Row="0" Grid.Column="0" 
+                               Text="ID da Etapa:" 
+                               VerticalTextAlignment="Center" />
+                        <Entry Grid.Row="0" Grid.Column="1"
+                               Text="{Binding IdEtapa}"
+                               Keyboard="Numeric"
+                               Placeholder="Ex: 1" />
+
+                        <Label Grid.Row="1" Grid.Column="0" 
+                               Text="Device ID:" 
+                               VerticalTextAlignment="Center" />
+                        <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*,Auto">
+                            <Entry Grid.Column="0"
+                                   Text="{Binding DeviceId}"
+                                   Placeholder="ID do coletor" />
+                            <Button Grid.Column="1"
+                                    Text="🔄"
+                                    WidthRequest="48"
+                                    Command="{Binding GerarNovoDeviceIdCommand}" />
+                        </Grid>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- SEÇÃO: API -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="☁️ SERVIDOR API" Style="{StaticResource LabelSubtitulo}" />
+
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="URL da API:" />
+                        <Entry Text="{Binding ApiUrl}"
+                               Placeholder="http://192.168.1.100:5000"
+                               Keyboard="Url" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Token (opcional):" />
+                        <Entry Text="{Binding ApiToken}"
+                               Placeholder="Token de autenticação"
+                               IsPassword="True" />
+                    </VerticalStackLayout>
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                            <BoxView WidthRequest="12" HeightRequest="12" CornerRadius="6"
+                                     Color="{Binding ApiConectada, Converter={StaticResource BoolToColorConverter}}" />
+                            <Label Text="{Binding ApiStatus}" VerticalTextAlignment="Center" />
+                        </HorizontalStackLayout>
+
+                        <Button Grid.Column="1"
+                                Text="Testar"
+                                Command="{Binding TestarApiCommand}"
+                                WidthRequest="100" />
+                    </Grid>
+
+                    <Button Text="📱 Escanear QR Code"
+                            Command="{Binding ScanQrCodeCommand}"
+                            Style="{StaticResource ButtonOutline}" />
+
+                    <Button Text="🔐 Autenticar Dispositivo"
+                            Command="{Binding AutenticarCommand}"
+                            Style="{StaticResource ButtonOutline}"
+                            Margin="0,8,0,0" />
+
+                    <Label x:Name="LblAuthStatus"
+                           Text="{Binding AuthStatus}"
+                           Style="{StaticResource LabelMuted}"
+                           HorizontalTextAlignment="Center"
+                           IsVisible="{Binding AuthStatus, Converter={StaticResource StringToBoolConverter}}" />
+
+
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- SEÇÃO: SERIAL -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="🔌 COMUNICAÇÃO SERIAL" Style="{StaticResource LabelSubtitulo}" />
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Baud Rate:" />
+                            <Picker ItemsSource="{Binding BaudRates}"
+                                    SelectedItem="{Binding BaudRateSelecionado}" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Protocolo:" />
+                            <Picker ItemsSource="{Binding Protocolos}"
+                                    SelectedItem="{Binding ProtocoloSelecionado}" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Info do protocolo selecionado -->
+                    <Frame BackgroundColor="{StaticResource BackgroundLight}" 
+                           Padding="12" CornerRadius="8">
+                        <Label Style="{StaticResource LabelMuted}">
+                            <Label.Text>
+                                <MultiBinding StringFormat="{}Formato: {0}">
+                                    <Binding Path="ProtocoloSelecionado" />
+                                </MultiBinding>
+                            </Label.Text>
+                        </Label>
+                    </Frame>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- SEÇÃO: FEEDBACK -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="🔔 FEEDBACK" Style="{StaticResource LabelSubtitulo}" />
+
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
+
+                        <Label Grid.Row="0" Grid.Column="0" 
+                               Text="Vibrar ao ler" 
+                               VerticalTextAlignment="Center" />
+                        <Switch Grid.Row="0" Grid.Column="1" 
+                                IsToggled="{Binding VibrarAoLer}" />
+
+                        <Label Grid.Row="1" Grid.Column="0" 
+                               Text="Som ao ler" 
+                               VerticalTextAlignment="Center" />
+                        <Switch Grid.Row="1" Grid.Column="1" 
+                                IsToggled="{Binding SomAoLer}" />
+
+                        <Label Grid.Row="2" Grid.Column="0" 
+                               Text="Manter tela ligada" 
+                               VerticalTextAlignment="Center" />
+                        <Switch Grid.Row="2" Grid.Column="1" 
+                                IsToggled="{Binding ManterTelaLigada}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- SEÇÃO: SINCRONIZAÇÃO -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="🔄 SINCRONIZAÇÃO" Style="{StaticResource LabelSubtitulo}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" 
+                               Text="Sincronização automática" 
+                               VerticalTextAlignment="Center" />
+                        <Switch Grid.Column="1" 
+                                IsToggled="{Binding SyncAutomatico}" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,100" ColumnSpacing="12" 
+                          IsVisible="{Binding SyncAutomatico}">
+                        <Label Grid.Column="0" 
+                               Text="Intervalo (segundos):" 
+                               VerticalTextAlignment="Center" />
+                        <Entry Grid.Column="1"
+                               Text="{Binding IntervaloSyncSegundos}"
+                               Keyboard="Numeric" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="🛠️ SUPORTE" Style="{StaticResource LabelSubtitulo}" />
+
+                    <Button Text="📋 Gerar Relatório de Diagnóstico"
+                            Command="{Binding GerarDiagnosticoCommand}"
+                            Style="{StaticResource ButtonOutline}" />
+
+                    <Label Text="Use este relatório para enviar ao suporte técnico em caso de problemas."
+                           Style="{StaticResource LabelMuted}"
+                           FontSize="11" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- BOTÃO SALVAR -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+
+            <Button Text="💾 SALVAR CONFIGURAÇÕES"
+                    Command="{Binding SalvarCommand}"
+                    Style="{StaticResource ButtonSuccess}"
+                    HeightRequest="60"
+                    FontSize="18"
+                    Margin="0,8,0,20" />
+
+            <!-- Status -->
+            <Label Text="{Binding StatusMessage}"
+                   HorizontalTextAlignment="Center"
+                   IsVisible="{Binding StatusMessage, Converter={StaticResource StringToBoolConverter}}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AppColetor.Views.Pages.ErroConexaoPage"
+             Title="Erro de Conexão"
+             BackgroundColor="{StaticResource BackgroundDark}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="24" VerticalOptions="Center">
+
+            <!-- Ícone -->
+            <Label Text="⚠️" 
+                   FontSize="80" 
+                   HorizontalTextAlignment="Center" />
+
+            <!-- Título -->
+            <Label Text="Conexão USB Perdida"
+                   Style="{StaticResource LabelTitulo}"
+                   HorizontalTextAlignment="Center" />
+
+            <!-- Mensagem -->
+            <Label x:Name="LblMensagem"
+                   Text="A conexão com o coletor foi perdida."
+                   Style="{StaticResource LabelSubtitulo}"
+                   HorizontalTextAlignment="Center" />
+
+            <!-- Card de Troubleshooting -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="16">
+                    <Label Text="🔧 O que verificar:" 
+                           FontAttributes="Bold" 
+                           FontSize="16" />
+
+                    <Grid ColumnDefinitions="30,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="12">
+
+                        <Label Grid.Row="0" Grid.Column="0" Text="1." FontAttributes="Bold" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="O cabo USB está bem conectado?" />
+
+                        <Label Grid.Row="1" Grid.Column="0" Text="2." FontAttributes="Bold" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="O coletor está ligado?" />
+
+                        <Label Grid.Row="2" Grid.Column="0" Text="3." FontAttributes="Bold" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="O adaptador OTG está funcionando?" />
+
+                        <Label Grid.Row="3" Grid.Column="0" Text="4." FontAttributes="Bold" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="Tente desconectar e reconectar o cabo" />
+
+                        <Label Grid.Row="4" Grid.Column="0" Text="5." FontAttributes="Bold" />
+                        <Label Grid.Row="4" Grid.Column="1" Text="Reinicie o coletor se necessário" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Info sobre dados -->
+            <Frame BackgroundColor="{StaticResource Success}" Padding="16" CornerRadius="8">
+                <HorizontalStackLayout Spacing="12">
+                    <Label Text="✅" FontSize="24" />
+                    <Label Text="Não se preocupe! Suas leituras estão salvas localmente e serão sincronizadas quando a conexão for restabelecida."
+                           TextColor="White"
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Frame>
+
+            <!-- Botões -->
+            <Button x:Name="BtnReconectar"
+                    Text="🔄 TENTAR RECONECTAR"
+                    Style="{StaticResource ButtonSuccess}"
+                    HeightRequest="60"
+                    FontSize="18"
+                    Clicked="OnReconectarClicked" />
+
+            <Button x:Name="BtnVoltar"
+                    Text="Voltar"
+                    Style="{StaticResource ButtonOutline}"
+                    Clicked="OnVoltarClicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

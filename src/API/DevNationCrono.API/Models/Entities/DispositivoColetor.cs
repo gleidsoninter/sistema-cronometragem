@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DevNationCrono.API.Models.Entities;
 
-[Table("DispositivosColetores")]
+[Table("dispositivoscoletores")]
 public class DispositivoColetor
 {
     [Key]
@@ -54,6 +54,8 @@ public class DispositivoColetor
 
     public int TotalLeituras { get; set; } = 0;
 
+    //public string? SenhaHash { get; set; }
+    [Column("ativo", TypeName = "tinyint(1)")]
     public bool Ativo { get; set; } = true;
 
     public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
@@ -65,5 +67,5 @@ public class DispositivoColetor
     [ForeignKey("IdEtapa")]
     public virtual Etapa Etapa { get; set; }
 
-    public virtual ICollection<Tempo> Tempos { get; set; }
+    //public virtual ICollection<Tempo> Tempos { get; set; }
 }

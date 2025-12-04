@@ -11,6 +11,8 @@ namespace DevNationCrono.API.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
+[Produces("application/json")]
+[Tags("Pilotos")]
 [Authorize]
 public class PilotosController : ControllerBase
 {

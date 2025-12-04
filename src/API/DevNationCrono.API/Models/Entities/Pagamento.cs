@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DevNationCrono.API.Models.Entities;
 
-[Table("Pagamentos")]
+[Table("pagamentos")]
 public class Pagamento
 {
     [Key]

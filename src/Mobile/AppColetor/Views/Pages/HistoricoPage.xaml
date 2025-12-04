@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AppColetor.ViewModels"
+             xmlns:models="clr-namespace:AppColetor.Models.Entities"
+             x:Class="AppColetor.Views.Pages.HistoricoPage"
+             x:DataType="vm:HistoricoViewModel"
+             Title="Histórico">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- ESTATÍSTICAS -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <Grid Grid.Row="0" 
+              ColumnDefinitions="*,*,*"
+              Padding="16,12"
+              BackgroundColor="{StaticResource BackgroundMedium}">
+
+            <!-- Total -->
+            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center">
+                <Label Text="{Binding TotalLeituras}" 
+                       FontSize="24" 
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Total" 
+                       Style="{StaticResource LabelMuted}" 
+                       FontSize="11"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <!-- Sincronizadas -->
+            <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
+                <Label Text="{Binding LeiturasSincronizadas}" 
+                       FontSize="24" 
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Success}"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Enviadas" 
+                       Style="{StaticResource LabelMuted}" 
+                       FontSize="11"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <!-- Pendentes -->
+            <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center">
+                <Label Text="{Binding LeiturasPendentes}" 
+                       FontSize="24" 
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Warning}"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Pendentes" 
+                       Style="{StaticResource LabelMuted}" 
+                       FontSize="11"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- FILTROS -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <HorizontalStackLayout Grid.Row="1" 
+                               Spacing="8" 
+                               Padding="16,8"
+                               HorizontalOptions="Center">
+
+            <Button Text="Todas"
+                    Command="{Binding FiltrarCommand}"
+                    CommandParameter="TODAS"
+                    Padding="16,8"
+                    HeightRequest="36">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="BackgroundColor" Value="{StaticResource BackgroundLight}" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding Filtro}" Value="TODAS">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Button Text="Pendentes"
+                    Command="{Binding FiltrarCommand}"
+                    CommandParameter="PENDENTES"
+                    Padding="16,8"
+                    HeightRequest="36">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="BackgroundColor" Value="{StaticResource BackgroundLight}" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding Filtro}" Value="PENDENTES">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Warning}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Button Text="Enviadas"
+                    Command="{Binding FiltrarCommand}"
+                    CommandParameter="SINCRONIZADAS"
+                    Padding="16,8"
+                    HeightRequest="36">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="BackgroundColor" Value="{StaticResource BackgroundLight}" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding Filtro}" Value="SINCRONIZADAS">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Success}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </HorizontalStackLayout>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- LISTA -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <RefreshView Grid.Row="2"
+                     Command="{Binding CarregarCommand}"
+                     IsRefreshing="{Binding IsRefreshing}">
+
+            <CollectionView ItemsSource="{Binding Leituras}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding LeituraSelecionada}"
+                            SelectionChangedCommand="{Binding VerDetalhesCommand}"
+                            SelectionChangedCommandParameter="{Binding LeituraSelecionada}">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Leitura">
+                        <Frame Margin="16,4" 
+                               Padding="12"
+                               BackgroundColor="{StaticResource BackgroundMedium}"
+                               BorderColor="Transparent"
+                               CornerRadius="8">
+
+                            <Grid ColumnDefinitions="60,*,Auto" RowDefinitions="Auto,Auto">
+
+                                <!-- Número -->
+                                <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                                       Text="{Binding NumeroMoto, StringFormat='#{0}'}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource Success}"
+                                       VerticalTextAlignment="Center" />
+
+                                <!-- Horário -->
+                                <Label Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding Timestamp, StringFormat='{0:dd/MM HH:mm:ss.fff}'}"
+                                       FontSize="14" />
+
+                                <!-- Dados brutos -->
+                                <Label Grid.Row="1" Grid.Column="1"
+                                       Text="{Binding DadosBrutos}"
+                                       Style="{StaticResource LabelMuted}"
+                                       FontSize="10"
+                                       LineBreakMode="TailTruncation" />
+
+                                <!-- Status -->
+                                <VerticalStackLayout Grid.Row="0" Grid.RowSpan="2" Grid.Column="2"
+                                                     VerticalOptions="Center">
+                                    <Label Text="{Binding Sincronizado, Converter={StaticResource SyncStatusConverter}}"
+                                           FontSize="20"
+                                           HorizontalTextAlignment="Center" />
+                                    <Label Text="{Binding TentativasSync, StringFormat='#{0}'}"
+                                           Style="{StaticResource LabelMuted}"
+                                           FontSize="10"
+                                           HorizontalTextAlignment="Center"
+                                           IsVisible="{Binding TentativasSync, Converter={StaticResource IntToBoolConverter}}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout VerticalOptions="Center" Padding="40">
+                        <Label Text="📭" FontSize="64" HorizontalTextAlignment="Center" />
+                        <Label Text="Nenhuma leitura encontrada"
+                               Style="{StaticResource LabelSubtitulo}"
+                               HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </RefreshView>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- AÇÕES -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <Grid Grid.Row="3" 
+              ColumnDefinitions="*,*,*"
+              Padding="16,12"
+              ColumnSpacing="8"
+              BackgroundColor="{StaticResource BackgroundMedium}">
+
+            <Button Grid.Column="0"
+                    Text="🔄 Sync"
+                    Command="{Binding SincronizarPendentesCommand}"
+                    IsEnabled="{Binding LeiturasPendentes, Converter={StaticResource IntToBoolConverter}}" />
+
+            <Button Grid.Column="1"
+                    Text="📤 Exportar"
+                    Command="{Binding ExportarLogCommand}"
+                    Style="{StaticResource ButtonOutline}" />
+
+            <Button Grid.Column="2"
+                    Text="🗑️ Limpar"
+                    Command="{Binding LimparHistoricoCommand}"
+                    Style="{StaticResource ButtonDanger}" />
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

@@ -1,4 +1,6 @@
-﻿using DevNationCrono.API.Models.DTOs;
+﻿using System.Security.Claims;
+using DevNationCrono.API.Models.DTOs;
+using DevNationCrono.API.Models.Entities;
 using DevNationCrono.API.Repositories.Interfaces;
 using DevNationCrono.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -7,19 +9,23 @@ using Microsoft.AspNetCore.Mvc;
 namespace DevNationCrono.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly IPilotoRepository _pilotoRepository;
+    private readonly IDispositivoColetorRepository _dispositivoRepository;  // ✅ Adicionado
     private readonly ITokenService _tokenService;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         IPilotoRepository pilotoRepository,
+        IDispositivoColetorRepository dispositivoRepository,  // ✅ Adicionado
         ITokenService tokenService,
         ILogger<AuthController> logger)
     {
         _pilotoRepository = pilotoRepository;
+        _dispositivoRepository = dispositivoRepository;  // ✅ Adicionado
         _tokenService = tokenService;
         _logger = logger;
     }
@@ -132,7 +138,7 @@ public class AuthController : ControllerBase
             var hash = BCrypt.Net.BCrypt.HashPassword(dto.Senha, salt);
 
             // Criar piloto
-            var piloto = new Models.Entities.Piloto
+            var piloto = new Piloto
             {
                 Nome = dto.Nome,
                 Email = dto.Email,
@@ -185,9 +191,9 @@ public class AuthController : ControllerBase
     [Authorize]
     public IActionResult ValidateToken()
     {
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var userName = User.Identity?.Name;
-        var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+        var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
         return Ok(new
         {
@@ -205,7 +211,7 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<ActionResult<UsuarioDto>> GetCurrentUser()
     {
-        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
         {
@@ -226,5 +232,78 @@ public class AuthController : ControllerBase
             Email = piloto.Email,
             Role = "Piloto"
         });
+    }
+
+    /// <summary>
+    /// Autentica um dispositivo coletor
+    /// </summary>
+    [HttpPost("dispositivo")]
+    [AllowAnonymous]
+    public async Task<ActionResult<AuthResultDto>> AutenticarDispositivo([FromBody] AuthDispositivoDto dto)
+    {
+        try
+        {
+            // Buscar dispositivo
+            var dispositivo = await _dispositivoRepository.GetByDeviceIdAsync(dto.DeviceId);
+
+            if (dispositivo == null)
+            {
+                return Unauthorized(new AuthResultDto
+                {
+                    Sucesso = false,
+                    Mensagem = "Dispositivo não encontrado ou inativo"
+                });
+            }
+
+            //// Verificar se tem senha configurada
+            //if (string.IsNullOrEmpty(dispositivo.SenhaHash))
+            //{
+            //    return Unauthorized(new AuthResultDto
+            //    {
+            //        Sucesso = false,
+            //        Mensagem = "Dispositivo não configurado para autenticação"
+            //    });
+            //}
+
+            //// Verificar senha
+            //if (!BCrypt.Net.BCrypt.Verify(dto.Senha, dispositivo.SenhaHash))
+            //{
+            //    _logger.LogWarning("Tentativa de login falhou para dispositivo {DeviceId}", dto.DeviceId);
+
+            //    return Unauthorized(new AuthResultDto
+            //    {
+            //        Sucesso = false,
+            //        Mensagem = "Senha inválida"
+            //    });
+            //}
+
+            // Gerar token JWT para o coletor
+            var token = _tokenService.GerarTokenColetor(dispositivo);
+
+            // Atualizar último acesso
+            dispositivo.UltimaConexao = DateTime.UtcNow;
+            dispositivo.StatusConexao = "ONLINE";
+            await _dispositivoRepository.UpdateAsync(dispositivo);
+
+            _logger.LogInformation("Dispositivo autenticado: {DeviceId}", dto.DeviceId);
+
+            return Ok(new AuthResultDto
+            {
+                Sucesso = true,
+                Token = token,
+                ExpiraEm = DateTime.UtcNow.AddHours(24),
+                DeviceId = dispositivo.DeviceId,
+                Nome = dispositivo.Nome
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro na autenticação do dispositivo");
+            return StatusCode(500, new AuthResultDto
+            {
+                Sucesso = false,
+                Mensagem = "Erro interno do servidor"
+            });
+        }
     }
 }

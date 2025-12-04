@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AppColetor.ViewModels"
+             x:Class="AppColetor.Views.Pages.TestesPage"
+             x:DataType="vm:TestesViewModel"
+             Title="🧪 Testes e Diagnósticos">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- Cabeçalho -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="🔬 TESTES DE STRESS"
+                           Style="{StaticResource LabelTitulo}" />
+                    <Label Text="Execute testes para validar o funcionamento do coletor"
+                           Style="{StaticResource LabelMuted}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Progresso -->
+            <Frame Style="{StaticResource CardFrame}"
+                   IsVisible="{Binding IsTestando}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="{Binding TesteMensagem}" FontAttributes="Bold" />
+                    <ProgressBar Progress="{Binding TesteProgresso}" 
+                                 ProgressColor="{StaticResource Primary}" />
+                    <Label Text="{Binding TesteDetalhe}" Style="{StaticResource LabelMuted}" />
+                    <Button Text="❌ Cancelar"
+                            Command="{Binding CancelarTesteCommand}"
+                            Style="{StaticResource ButtonDanger}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Teste de Leituras Rápidas -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="⚡ Teste de Leituras Rápidas" FontAttributes="Bold" />
+                    <Label Text="Simula múltiplas leituras em sequência rápida"
+                           Style="{StaticResource LabelMuted}" />
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" 
+                          ColumnSpacing="12" RowSpacing="8">
+                        <VerticalStackLayout Grid.Row="0" Grid.Column="0">
+                            <Label Text="Total de Leituras" FontSize="12" />
+                            <Entry Text="{Binding TotalLeiturasRapidas}" 
+                                   Keyboard="Numeric" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Row="0" Grid.Column="1">
+                            <Label Text="Intervalo (ms)" FontSize="12" />
+                            <Entry Text="{Binding IntervaloLeiturasMs}" 
+                                   Keyboard="Numeric" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Button Text="▶️ Executar Teste"
+                            Command="{Binding ExecutarTesteLeiturasCommand}"
+                            IsEnabled="{Binding PodeExecutar}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Teste de Burst -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="💥 Teste de Rajada (Burst)" FontAttributes="Bold" />
+                    <Label Text="Simula largada com muitas motos passando juntas"
+                           Style="{StaticResource LabelMuted}" />
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" 
+                          ColumnSpacing="12" RowSpacing="8">
+                        <VerticalStackLayout Grid.Row="0" Grid.Column="0">
+                            <Label Text="Leituras por Rajada" FontSize="12" />
+                            <Entry Text="{Binding LeiturasPorBurst}" 
+                                   Keyboard="Numeric" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Row="0" Grid.Column="1">
+                            <Label Text="Número de Rajadas" FontSize="12" />
+                            <Entry Text="{Binding NumeroBursts}" 
+                                   Keyboard="Numeric" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Button Text="▶️ Executar Teste"
+                            Command="{Binding ExecutarTesteBurstCommand}"
+                            IsEnabled="{Binding PodeExecutar}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Teste de Memória -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="🧠 Teste de Memória" FontAttributes="Bold" />
+                    <Label Text="Verifica vazamentos de memória após múltiplos ciclos"
+                           Style="{StaticResource LabelMuted}" />
+
+                    <Button Text="▶️ Executar Teste"
+                            Command="{Binding ExecutarTesteMemoriaCommand}"
+                            IsEnabled="{Binding PodeExecutar}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Teste de Reconexão -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="🔄 Teste de Reconexão" FontAttributes="Bold" />
+                    <Label Text="Simula quedas de conexão e reconexão automática"
+                           Style="{StaticResource LabelMuted}" />
+
+                    <Button Text="▶️ Executar Teste"
+                            Command="{Binding ExecutarTesteReconexaoCommand}"
+                            IsEnabled="{Binding PodeExecutar}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Teste de Sync Offline -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="📶 Teste de Sincronização Offline" FontAttributes="Bold" />
+                    <Label Text="Testa armazenamento local e sincronização posterior"
+                           Style="{StaticResource LabelMuted}" />
+
+                    <Button Text="▶️ Executar Teste"
+                            Command="{Binding ExecutarTesteSyncOfflineCommand}"
+                            IsEnabled="{Binding PodeExecutar}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Resultado do Teste -->
+            <Frame Style="{StaticResource CardFrame}"
+                   BackgroundColor="{Binding ResultadoCor}"
+                   IsVisible="{Binding TemResultado}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="📊 RESULTADO" FontAttributes="Bold" />
+                    <Label Text="{Binding ResultadoTexto}"
+                           FontFamily="Consolas" 
+                           FontSize="12" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Diagnósticos -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="🔍 DIAGNÓSTICOS" Style="{StaticResource LabelSubtitulo}" />
+
+                    <Button Text="📋 Gerar Relatório Completo"
+                            Command="{Binding GerarRelatorioCommand}" />
+
+                    <Button Text="🗑️ Limpar Dados de Teste"
+                            Command="{Binding LimparDadosTesteCommand}"
+                            Style="{StaticResource ButtonOutline}" />
+
+                    <Button Text="📤 Exportar Logs"
+                            Command="{Binding ExportarLogsCommand}"
+                            Style="{StaticResource ButtonOutline}" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

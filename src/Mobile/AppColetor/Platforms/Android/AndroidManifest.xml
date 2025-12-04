@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+	<!-- USB Host - OBRIGATÓRIO para comunicação com coletor -->
+	<uses-feature
+		android:name="android.hardware.usb.host"
+		android:required="true" />
+
+	<!-- ═══════════════════════════════════════════════════════════════════ -->
+	<!-- PERMISSÕES -->
+	<!-- ═══════════════════════════════════════════════════════════════════ -->
+
+	<!-- Internet - Para comunicação com API -->
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+	<!-- Wake Lock - Manter CPU ativa durante coleta -->
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
+
+	<!-- Vibração - Feedback de leitura -->
+	<uses-permission android:name="android.permission.VIBRATE" />
+
+	<!-- Foreground Service - Manter coleta rodando em background -->
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+
+	<!-- Post Notifications (Android 13+) -->
+	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+	<!-- Receive Boot Completed - Iniciar app automaticamente (opcional) -->
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />	
+	<application 
+		android:allowBackup="true" 
+		android:icon="@mipmap/appicon" 
+		android:roundIcon="@mipmap/appicon_round" 
+		android:label="Coletor Cronometragem"
+		android:theme="@style/Maui.SplashTheme"
+		android:usesCleartextTraffic="true"
+		android:networkSecurityConfig="@xml/network_security_config"
+		android:supportsRtl="true">
+
+		<!-- ═══════════════════════════════════════════════════════════════ -->
+		<!-- ACTIVITY PRINCIPAL -->
+		<!-- ═══════════════════════════════════════════════════════════════ -->
+
+		<activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|uiMode|keyboard|keyboardHidden"
+            android:theme="@style/Maui.SplashTheme"
+            android:windowSoftInputMode="adjustResize">
+
+			<!-- Intent filter padrão - launcher -->
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+
+			<!-- Intent filter para USB - abre app quando conecta dispositivo -->
+			<intent-filter>
+				<action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+			</intent-filter>
+
+			<!-- Referência ao filtro de dispositivos USB -->
+			<meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/device_filter" />
+
+		</activity>
+
+		<!-- ═══════════════════════════════════════════════════════════════ -->
+		<!-- FOREGROUND SERVICE - Coleta em background -->
+		<!-- ═══════════════════════════════════════════════════════════════ -->
+
+		<service
+            android:name=".Services.ColetaForegroundService"
+            android:foregroundServiceType="connectedDevice"
+            android:exported="false" />
+
+		<!-- ═══════════════════════════════════════════════════════════════ -->
+		<!-- BROADCAST RECEIVERS -->
+		<!-- ═══════════════════════════════════════════════════════════════ -->
+
+		<!-- Receiver para eventos USB -->
+		<receiver
+            android:name=".Receivers.UsbReceiver"
+            android:exported="true">
+			<intent-filter>
+				<action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+				<action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
+			</intent-filter>
+		</receiver>		
+		
+	</application>
+	
+</manifest>

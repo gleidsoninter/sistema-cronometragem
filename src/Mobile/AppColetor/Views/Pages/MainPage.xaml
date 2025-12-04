@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AppColetor.ViewModels"
+             xmlns:models="clr-namespace:AppColetor.Models.Entities"
+             xmlns:controls="clr-namespace:AppColetor.Views.Controls"
+             x:Class="AppColetor.Views.Pages.MainPage"
+             x:DataType="vm:MainViewModel"
+             Title="Coletor">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- BARRA DE STATUS SUPERIOR -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <Grid Grid.Row="0" 
+              BackgroundColor="{StaticResource BackgroundMedium}"
+              Padding="12,8"
+              ColumnDefinitions="*,Auto,Auto,Auto">
+
+            <!-- Etapa -->
+            <HorizontalStackLayout Grid.Column="0" Spacing="4">
+                <Label Text="📍" FontSize="14" />
+                <Label Text="Etapa:" TextColor="{StaticResource TextSecondary}" FontSize="12" />
+                <Label Text="{Binding IdEtapa}" FontAttributes="Bold" FontSize="12" />
+            </HorizontalStackLayout>
+
+            <!-- Status USB -->
+            <Frame Grid.Column="1" 
+                   BackgroundColor="{Binding IsUsbConnected, Converter={StaticResource StatusBackgroundConverter}}"
+                   Padding="8,4" CornerRadius="12" Margin="4,0">
+                <HorizontalStackLayout Spacing="4">
+                    <Label Text="🔌" FontSize="12" />
+                    <Label Text="{Binding UsbStatus}" FontSize="11" TextColor="White" />
+                </HorizontalStackLayout>
+            </Frame>
+
+            <!-- Status API -->
+            <Frame Grid.Column="2"
+                   BackgroundColor="{Binding IsApiConnected, Converter={StaticResource StatusBackgroundConverter}}"
+                   Padding="8,4" CornerRadius="12" Margin="4,0">
+                <HorizontalStackLayout Spacing="4">
+                    <Label Text="☁️" FontSize="12" />
+                    <Label Text="{Binding ApiStatus}" FontSize="11" TextColor="White" />
+                </HorizontalStackLayout>
+            </Frame>
+
+            <!-- Pendentes -->
+            <Frame Grid.Column="3"
+                   BackgroundColor="{Binding LeiturasPendentes, Converter={StaticResource PendingBackgroundConverter}}"
+                   Padding="8,4" CornerRadius="12" Margin="4,0"
+                   IsVisible="{Binding LeiturasPendentes, Converter={StaticResource IntToBoolConverter}}">
+                <HorizontalStackLayout Spacing="4">
+                    <Label Text="⏳" FontSize="12" />
+                    <Label Text="{Binding LeiturasPendentes}" FontSize="11" TextColor="White" FontAttributes="Bold" />
+                </HorizontalStackLayout>
+            </Frame>
+        </Grid>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- ÁREA DE ÚLTIMA LEITURA (DESTAQUE) -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <Frame Grid.Row="1" 
+               Style="{StaticResource CardLeitura}"
+               Margin="16,8"
+               Padding="16">
+
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto">
+
+                <!-- Título -->
+                <Label Grid.Row="0" Grid.ColumnSpan="2"
+                       Text="ÚLTIMA LEITURA"
+                       Style="{StaticResource LabelMuted}"
+                       HorizontalTextAlignment="Center"
+                       Margin="0,0,0,8" />
+
+                <!-- Número da Moto (GRANDE) -->
+                <Label Grid.Row="1" Grid.Column="0"
+                       Style="{StaticResource LabelLeituraGrande}"
+                       HorizontalOptions="Start">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="#" FontSize="32" />
+                            <Span Text="{Binding UltimaLeitura.NumeroMoto, FallbackValue='--'}" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+
+                <!-- Botão Editar -->
+                <Button Grid.Row="1" Grid.Column="1"
+                        Text="✏️"
+                        WidthRequest="50"
+                        HeightRequest="50"
+                        CornerRadius="25"
+                        BackgroundColor="{StaticResource BackgroundLight}"
+                        Command="{Binding EditarUltimaLeituraCommand}"
+                        IsVisible="{Binding UltimaLeitura, Converter={StaticResource NullToBoolConverter}}"
+                        VerticalOptions="Center" />
+
+                <!-- Hora -->
+                <Label Grid.Row="2" Grid.ColumnSpan="2"
+                       Text="{Binding UltimaLeitura.Timestamp, StringFormat='{0:HH:mm:ss.fff}', FallbackValue='--:--:--.---'}"
+                       FontSize="24"
+                       TextColor="{StaticResource TextSecondary}"
+                       HorizontalTextAlignment="Center"
+                       Margin="0,4,0,0" />
+
+                <!-- Info extra (volta, status sync) -->
+                <HorizontalStackLayout Grid.Row="3" Grid.ColumnSpan="2"
+                                       HorizontalOptions="Center"
+                                       Spacing="16"
+                                       Margin="0,8,0,0">
+
+                    <Label IsVisible="{Binding UltimaLeitura.Volta, Converter={StaticResource NullToBoolConverter}}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Volta: " TextColor="{StaticResource TextMuted}" />
+                                <Span Text="{Binding UltimaLeitura.Volta}" FontAttributes="Bold" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+
+                    <Label Text="{Binding UltimaLeitura.Sincronizado, Converter={StaticResource SyncStatusTextConverter}}"
+                           TextColor="{Binding UltimaLeitura.Sincronizado, Converter={StaticResource SyncStatusColorConverter}}" />
+
+                    <!-- Tempo calculado (se veio da API) -->
+                    <Label IsVisible="{Binding UltimaLeitura.RespostaApi, Converter={StaticResource StringToBoolConverter}}"
+                           TextColor="{StaticResource Success}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="⏱️ " />
+                                <Span Text="{Binding UltimaLeitura.RespostaApi}" FontAttributes="Bold" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </HorizontalStackLayout>
+            </Grid>
+        </Frame>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- LISTA DE LEITURAS RECENTES -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <Frame Grid.Row="2" 
+               Style="{StaticResource CardFrame}"
+               Margin="16,8"
+               Padding="0">
+
+            <Grid RowDefinitions="Auto,*">
+
+                <!-- Header da lista -->
+                <Grid Grid.Row="0" 
+                      BackgroundColor="{StaticResource BackgroundLight}"
+                      Padding="12,8"
+                      ColumnDefinitions="50,*,80,50">
+                    <Label Grid.Column="0" Text="Moto" Style="{StaticResource LabelMuted}" FontSize="11" />
+                    <Label Grid.Column="1" Text="Horário" Style="{StaticResource LabelMuted}" FontSize="11" />
+                    <Label Grid.Column="2" Text="Status" Style="{StaticResource LabelMuted}" FontSize="11" HorizontalTextAlignment="Center" />
+                    <Label Grid.Column="3" Text="" />
+                </Grid>
+
+                <!-- Lista -->
+                <CollectionView Grid.Row="1"
+                                ItemsSource="{Binding LeiturasRecentes}"
+                                SelectionMode="None">
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Leitura">
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem Text="Editar"
+                                                   BackgroundColor="{StaticResource Primary}"
+                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=EditarLeituraCommand}"
+                                                   CommandParameter="{Binding .}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+
+                                <Grid ColumnDefinitions="50,*,80,50"
+                                      Padding="12,10"
+                                      BackgroundColor="{StaticResource BackgroundMedium}">
+
+                                    <!-- Número -->
+                                    <Label Grid.Column="0"
+                                           Text="{Binding NumeroMoto, StringFormat='#{0}'}"
+                                           FontAttributes="Bold"
+                                           FontSize="16"
+                                           TextColor="{StaticResource Success}"
+                                           VerticalTextAlignment="Center" />
+
+                                    <!-- Horário -->
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                        <Label Text="{Binding Timestamp, StringFormat='{0:HH:mm:ss.fff}'}"
+                                               FontSize="14" />
+                                        <Label Text="{Binding DadosBrutos}"
+                                               Style="{StaticResource LabelMuted}"
+                                               FontSize="10"
+                                               LineBreakMode="TailTruncation"
+                                               MaxLines="1" />
+                                    </VerticalStackLayout>
+
+                                    <!-- Status Sync -->
+                                    <Frame Grid.Column="2"
+                                           BackgroundColor="{Binding Sincronizado, Converter={StaticResource SyncBackgroundConverter}}"
+                                           Padding="6,2"
+                                           CornerRadius="8"
+                                           VerticalOptions="Center"
+                                           HorizontalOptions="Center">
+                                        <Label Text="{Binding Sincronizado, Converter={StaticResource SyncStatusTextConverter}}"
+                                               FontSize="10"
+                                               TextColor="White" />
+                                    </Frame>
+
+                                    <!-- Ação -->
+                                    <Label Grid.Column="3"
+                                           Text="›"
+                                           FontSize="20"
+                                           TextColor="{StaticResource TextMuted}"
+                                           VerticalTextAlignment="Center"
+                                           HorizontalTextAlignment="Center" />
+                                </Grid>
+                            </SwipeView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout VerticalOptions="Center" 
+                                             HorizontalOptions="Center"
+                                             Padding="40">
+                            <Label Text="📡" FontSize="64" HorizontalTextAlignment="Center" />
+                            <Label Text="Nenhuma leitura ainda"
+                                   Style="{StaticResource LabelSubtitulo}"
+                                   HorizontalTextAlignment="Center"
+                                   Margin="0,16,0,0" />
+                            <Label Text="Conecte o coletor USB e aguarde as passagens"
+                                   Style="{StaticResource LabelMuted}"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
+                </CollectionView>
+            </Grid>
+        </Frame>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- BARRA DE AÇÕES INFERIOR -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <Grid Grid.Row="3"
+              BackgroundColor="{StaticResource BackgroundMedium}"
+              Padding="16,12"
+              ColumnDefinitions="*,*,Auto">
+
+            <!-- Botão Conectar/Desconectar USB -->
+            <Button Grid.Column="0"
+                    Command="{Binding ToggleUsbCommand}"
+                    HeightRequest="56"
+                    Margin="0,0,8,0">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource ButtonSuccess}">
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Button" 
+                                         Binding="{Binding IsUsbConnected}" 
+                                         Value="True">
+                                <Setter Property="Text" Value="🔌 DESCONECTAR" />
+                                <Setter Property="BackgroundColor" Value="{StaticResource Danger}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" 
+                                         Binding="{Binding IsUsbConnected}" 
+                                         Value="False">
+                                <Setter Property="Text" Value="🔌 CONECTAR" />
+                                <Setter Property="BackgroundColor" Value="{StaticResource Success}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <!-- Botão Sincronizar -->
+            <Button Grid.Column="1"
+                    Text="🔄 SYNC"
+                    Command="{Binding SincronizarCommand}"
+                    HeightRequest="56"
+                    Margin="8,0,0,0"
+                    IsEnabled="{Binding LeiturasPendentes, Converter={StaticResource IntToBoolConverter}}">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" 
+                                 Binding="{Binding IsSyncing}" 
+                                 Value="True">
+                        <Setter Property="Text" Value="⏳ ENVIANDO..." />
+                        <Setter Property="IsEnabled" Value="False" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+
+            <!-- Botão Leitura Manual -->
+            <Button Grid.Column="2"
+                    Text="➕"
+                    Command="{Binding LeituraManualCommand}"
+                    WidthRequest="56"
+                    HeightRequest="56"
+                    CornerRadius="28"
+                    BackgroundColor="{StaticResource Secondary}"
+                    FontSize="24"
+                    Margin="8,0,0,0" />
+        </Grid>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- OVERLAY DE LOADING -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
+        <Grid Grid.RowSpan="4"
+              BackgroundColor="#CC000000"
+              IsVisible="{Binding IsBusy}">
+            <Frame BackgroundColor="{StaticResource BackgroundMedium}"
+                   CornerRadius="16"
+                   Padding="32"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center">
+                <VerticalStackLayout Spacing="16">
+                    <ActivityIndicator IsRunning="True" 
+                                       WidthRequest="48" 
+                                       HeightRequest="48"
+                                       Color="{StaticResource Primary}" />
+                    <Label Text="{Binding StatusMessage}"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Frame>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

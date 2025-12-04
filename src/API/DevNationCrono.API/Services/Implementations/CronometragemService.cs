@@ -18,6 +18,7 @@ public class CronometragemService : ICronometragemService
     private readonly ITokenService _tokenService;
     private readonly ILogger<CronometragemService> _logger;
     private readonly IResultadoCircuitoService _resultadoCircuitoService;
+    private readonly INotificacaoTempoRealService _notificacaoService;
 
     // Tolerância para detectar duplicatas (milissegundos)
     private const int TOLERANCIA_DUPLICATA_MS = 2000;
@@ -29,7 +30,8 @@ public class CronometragemService : ICronometragemService
         IInscricaoRepository inscricaoRepository,
         ITokenService tokenService,
         ILogger<CronometragemService> logger,
-        IResultadoCircuitoService resultadoCircuitoService)
+        IResultadoCircuitoService resultadoCircuitoService,
+        INotificacaoTempoRealService notificacaoService)
     {
         _tempoRepository = tempoRepository;
         _dispositivoRepository = dispositivoRepository;
@@ -38,6 +40,7 @@ public class CronometragemService : ICronometragemService
         _tokenService = tokenService;
         _logger = logger;
         _resultadoCircuitoService = resultadoCircuitoService;
+        _notificacaoService = notificacaoService;
     }
 
     #region Processar Leituras
@@ -50,7 +53,7 @@ public class CronometragemService : ICronometragemService
 
         try
         {
-            // 1. Validar dispositivo
+            //// 1. Validar dispositivo
             var dispositivo = await ValidarDispositivoAsync(leitura.DeviceId, leitura.IdEtapa);
 
             // 2. Validar etapa
@@ -106,11 +109,51 @@ public class CronometragemService : ICronometragemService
             // 9. Calcular tempo (se aplicável)
             await CalcularTempoLeituraAsync(tempo, etapa);
 
+            await _tempoRepository.AddAsync(tempo);
+
             // 10. Salvar
             if (etapa.Evento.Modalidade.TipoCronometragem == "CIRCUITO" && tempo.Tipo == "P")
             {
                 await _resultadoCircuitoService.AtualizarResultadoIncrementalAsync(
                     tempo.IdEtapa, tempo.NumeroMoto);
+            }
+
+            // ===== NOTIFICAÇÕES TEMPO REAL =====
+            try
+            {
+                var tipoCronometragem = etapa.Evento.Modalidade.TipoCronometragem;
+
+                if (tipoCronometragem == "CIRCUITO")
+                {
+                    // Calcular posição atual
+                    var classificacao = await _resultadoCircuitoService.GetResumoTempoRealAsync(leitura.IdEtapa);
+                    var posicaoAtual = classificacao
+                        .FirstOrDefault(c => c.NumeroMoto == leitura.NumeroMoto)?.PosicaoGeral ?? 0;
+
+                    // Notificar nova passagem
+                    await _notificacaoService.NotificarNovaPassagemAsync(tempo, inscricao, posicaoAtual);
+
+                    // Verificar se é melhor volta
+                    await VerificarENotificarMelhorVoltaAsync(tempo, leitura.IdEtapa);
+
+                    // Notificar classificação atualizada
+                    await _notificacaoService.NotificarClassificacaoAtualizadaAsync(leitura.IdEtapa);
+                }
+                else // ENDURO
+                {
+                    decimal? tempoEspecial = null;
+                    if (tempo.Tipo == "S" && tempo.TempoCalculadoSegundos.HasValue)
+                    {
+                        tempoEspecial = tempo.TempoCalculadoSegundos;
+                    }
+
+                    await _notificacaoService.NotificarPassagemEnduroAsync(tempo, inscricao, tempoEspecial);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log mas não falha a operação principal
+                _logger.LogError(ex, "Erro ao enviar notificação SignalR");
             }
 
             // 11. Atualizar estatísticas do dispositivo
@@ -457,19 +500,19 @@ public class CronometragemService : ICronometragemService
                     {
                         // Piloto não passou - aplicar penalidade
                         dto.Penalizado = true;
-                        dto.PenalidadeSegundos = etapa.PenalidadePorFaltaSegundos;
-                        dto.TempoSegundos = etapa.PenalidadePorFaltaSegundos;
+                        dto.PenalidadeSegundos = etapa.PenalidadePorFaltaSegundos ?? 0;
+                        dto.TempoSegundos = etapa.PenalidadePorFaltaSegundos ?? 0;
                         dto.TempoFormatado = FormatarTempo(
-                            TimeSpan.FromSeconds(etapa.PenalidadePorFaltaSegundos));
+                            TimeSpan.FromSeconds(etapa.PenalidadePorFaltaSegundos ?? 0));
                         dto.MotivoPenalidade = "Não passou na especial";
                     }
                     else
                     {
                         dto.Penalizado = true;
-                        dto.PenalidadeSegundos = etapa.PenalidadePorFaltaSegundos;
+                        dto.PenalidadeSegundos = etapa.PenalidadePorFaltaSegundos ?? 0;
                         dto.TempoSegundos = etapa.PenalidadePorFaltaSegundos;
                         dto.TempoFormatado = FormatarTempo(
-                            TimeSpan.FromSeconds(etapa.PenalidadePorFaltaSegundos));
+                            TimeSpan.FromSeconds(etapa.PenalidadePorFaltaSegundos ?? 0));
                         dto.MotivoPenalidade = entrada == null
                             ? "Falta entrada"
                             : "Falta saída";
@@ -870,6 +913,32 @@ public class CronometragemService : ICronometragemService
             Status = "ERRO",
             Mensagem = mensagem
         };
+    }
+
+    private async Task VerificarENotificarMelhorVoltaAsync(Tempo tempo, int idEtapa)
+    {
+        if (!tempo.TempoCalculadoSegundos.HasValue || tempo.Volta <= 1)
+            return;
+
+        // Buscar melhor volta geral atual
+        var classificacao = await _resultadoCircuitoService.CalcularClassificacaoGeralAsync(idEtapa);
+
+        var melhorVoltaGeral = classificacao.Classificacao
+            .Where(c => c.MelhorVoltaSegundos.HasValue)
+            .OrderBy(c => c.MelhorVoltaSegundos)
+            .FirstOrDefault();
+
+        if (melhorVoltaGeral != null &&
+            melhorVoltaGeral.NumeroMoto == tempo.NumeroMoto &&
+            tempo.TempoCalculadoSegundos == melhorVoltaGeral.MelhorVoltaSegundos)
+        {
+            // É a melhor volta geral!
+            await _notificacaoService.NotificarMelhorVoltaGeralAsync(
+                idEtapa,
+                tempo.NumeroMoto,
+                melhorVoltaGeral.NomePiloto,
+                melhorVoltaGeral.MelhorVoltaFormatado);
+        }
     }
 
     #endregion

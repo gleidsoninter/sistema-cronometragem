@@ -28,7 +28,7 @@ public class LeiturasController : ControllerBase
     /// Recebe uma leitura individual do coletor
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Coletor,Admin,Organizador")]
+    [Authorize]
     [ProducesResponseType(typeof(LeituraResponseDto), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult<LeituraResponseDto>> ReceberLeitura([FromBody] LeituraDto leitura)
@@ -47,7 +47,7 @@ public class LeiturasController : ControllerBase
     /// Recebe lote de leituras (sincronização offline)
     /// </summary>
     [HttpPost("lote")]
-    [Authorize(Roles = "Coletor,Admin,Organizador")]
+    [Authorize]
     [ProducesResponseType(typeof(LoteLeituraResponseDto), 200)]
     public async Task<ActionResult<LoteLeituraResponseDto>> ReceberLote([FromBody] LoteLeituraDto lote)
     {

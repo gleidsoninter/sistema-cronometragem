@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AppColetor.ViewModels"
+             xmlns:models="clr-namespace:AppColetor.Models.Entities"
+             x:Class="AppColetor.Views.Pages.LogsPage"
+             x:DataType="vm:LogsViewModel"
+             Title="📋 Logs">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- Estatísticas -->
+        <Grid Grid.Row="0" 
+              ColumnDefinitions="*,*,*"
+              Padding="16,12"
+              BackgroundColor="{StaticResource BackgroundMedium}">
+
+            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center">
+                <Label Text="{Binding TotalLogs}" 
+                       FontSize="24" FontAttributes="Bold"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Total" Style="{StaticResource LabelMuted}" 
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
+                <Label Text="{Binding TotalErros}" 
+                       FontSize="24" FontAttributes="Bold"
+                       TextColor="{StaticResource Danger}"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Erros" Style="{StaticResource LabelMuted}" 
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center">
+                <Label Text="{Binding TotalWarnings}" 
+                       FontSize="24" FontAttributes="Bold"
+                       TextColor="{StaticResource Warning}"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Warnings" Style="{StaticResource LabelMuted}" 
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- Filtros -->
+        <HorizontalStackLayout Grid.Row="1" 
+                               Spacing="8" 
+                               Padding="16,8"
+                               HorizontalOptions="Center">
+
+            <Button Text="Todos"
+                    Command="{Binding FiltrarCommand}"
+                    CommandParameter=""
+                    Padding="12,6" />
+
+            <Button Text="🔴 Erros"
+                    Command="{Binding FiltrarCommand}"
+                    CommandParameter="ERROR"
+                    Padding="12,6" />
+
+            <Button Text="🟡 Warnings"
+                    Command="{Binding FiltrarCommand}"
+                    CommandParameter="WARNING"
+                    Padding="12,6" />
+        </HorizontalStackLayout>
+
+        <!-- Lista de Logs -->
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding Logs}"
+                        SelectionMode="Single"
+                        SelectedItem="{Binding LogSelecionado}">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:LogEvento">
+                    <Frame Margin="16,4" Padding="12"
+                           BackgroundColor="{StaticResource BackgroundMedium}"
+                           BorderColor="Transparent"
+                           CornerRadius="8">
+
+                        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*">
+
+                            <!-- Ícone do tipo -->
+                            <Label Grid.Row="0" Grid.Column="0"
+                                   Text="{Binding Tipo, Converter={StaticResource LogTypeIconConverter}}"
+                                   FontSize="16"
+                                   Margin="0,0,8,0" />
+
+                            <!-- Categoria e Hora -->
+                            <HorizontalStackLayout Grid.Row="0" Grid.Column="1">
+                                <Label Text="{Binding Categoria}"
+                                       FontAttributes="Bold"
+                                       FontSize="12" />
+                                <Label Text=" • " Style="{StaticResource LabelMuted}" />
+                                <Label Text="{Binding DataHora, StringFormat='{0:HH:mm:ss}'}"
+                                       Style="{StaticResource LabelMuted}"
+                                       FontSize="11" />
+                            </HorizontalStackLayout>
+
+                            <!-- Mensagem -->
+                            <Label Grid.Row="1" Grid.ColumnSpan="2"
+                                   Text="{Binding Mensagem}"
+                                   FontSize="13"
+                                   LineBreakMode="TailTruncation"
+                                   MaxLines="2"
+                                   Margin="0,4,0,0" />
+
+                            <!-- Dados (se existir) -->
+                            <Label Grid.Row="2" Grid.ColumnSpan="2"
+                                   Text="{Binding Dados}"
+                                   Style="{StaticResource LabelMuted}"
+                                   FontSize="10"
+                                   LineBreakMode="TailTruncation"
+                                   MaxLines="1"
+                                   IsVisible="{Binding Dados, Converter={StaticResource StringToBoolConverter}}" />
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" Padding="40">
+                    <Label Text="📭" FontSize="48" HorizontalTextAlignment="Center" />
+                    <Label Text="Nenhum log encontrado"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+        <!-- Ações -->
+        <Grid Grid.Row="3" 
+              ColumnDefinitions="*,*,*"
+              Padding="16,12"
+              ColumnSpacing="8"
+              BackgroundColor="{StaticResource BackgroundMedium}">
+
+            <Button Grid.Column="0"
+                    Text="🔄 Atualizar"
+                    Command="{Binding AtualizarCommand}" />
+
+            <Button Grid.Column="1"
+                    Text="📤 Exportar"
+                    Command="{Binding ExportarCommand}"
+                    Style="{StaticResource ButtonOutline}" />
+
+            <Button Grid.Column="2"
+                    Text="🗑️ Limpar"
+                    Command="{Binding LimparCommand}"
+                    Style="{StaticResource ButtonDanger}" />
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

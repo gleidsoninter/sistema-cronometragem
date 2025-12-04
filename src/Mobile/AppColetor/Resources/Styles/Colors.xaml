@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- ============================================ -->
+    <!-- CORES BASE (não mudam com tema)              -->
+    <!-- ============================================ -->
+    <Color x:Key="Primary">#FF5722</Color>
+    <Color x:Key="PrimaryDark">#E64A19</Color>
+    <Color x:Key="PrimaryLight">#FFCCBC</Color>
+    <Color x:Key="Secondary">#1976D2</Color>
+    <Color x:Key="Accent">#FFC107</Color>
+
+    <Color x:Key="Success">#4CAF50</Color>
+    <Color x:Key="Warning">#FF9800</Color>
+    <Color x:Key="Error">#F44336</Color>
+    <Color x:Key="Info">#2196F3</Color>
+
+    <!-- Cores das modalidades -->
+    <Color x:Key="ColorEnduro">#4CAF50</Color>
+    <Color x:Key="ColorMotocross">#FF5722</Color>
+    <Color x:Key="ColorCrossCountry">#795548</Color>
+    <Color x:Key="ColorMotovelocidade">#2196F3</Color>
+    <Color x:Key="ColorSupermoto">#9C27B0</Color>
+
+    <!-- ============================================ -->
+    <!-- CORES DO TEMA CLARO                          -->
+    <!-- ============================================ -->
+    <Color x:Key="LightBackground">#FAFAFA</Color>
+    <Color x:Key="LightSurface">#FFFFFF</Color>
+    <Color x:Key="LightSurfaceVariant">#F5F5F5</Color>
+    <Color x:Key="LightTextPrimary">#212121</Color>
+    <Color x:Key="LightTextSecondary">#757575</Color>
+    <Color x:Key="LightBorder">#E0E0E0</Color>
+    <Color x:Key="LightDivider">#EEEEEE</Color>
+
+    <!-- ============================================ -->
+    <!-- CORES DO TEMA ESCURO                         -->
+    <!-- ============================================ -->
+    <Color x:Key="DarkBackground">#121212</Color>
+    <Color x:Key="DarkSurface">#1E1E1E</Color>
+    <Color x:Key="DarkSurfaceVariant">#2D2D2D</Color>
+    <Color x:Key="DarkTextPrimary">#FFFFFF</Color>
+    <Color x:Key="DarkTextSecondary">#AAAAAA</Color>
+    <Color x:Key="DarkBorder">#333333</Color>
+    <Color x:Key="DarkDivider">#2D2D2D</Color>
+
+    <!-- ============================================ -->
+    <!-- CORES SEMÂNTICAS (mudam com tema)            -->
+    <!-- ============================================ -->
+    <Color x:Key="Background">
+        <AppThemeBinding Light="{StaticResource LightBackground}" 
+                         Dark="{StaticResource DarkBackground}" />
+    </Color>
+
+    <Color x:Key="Surface">
+        <AppThemeBinding Light="{StaticResource LightSurface}" 
+                         Dark="{StaticResource DarkSurface}" />
+    </Color>
+
+    <Color x:Key="SurfaceVariant">
+        <AppThemeBinding Light="{StaticResource LightSurfaceVariant}" 
+                         Dark="{StaticResource DarkSurfaceVariant}" />
+    </Color>
+
+    <Color x:Key="TextPrimary">
+        <AppThemeBinding Light="{StaticResource LightTextPrimary}" 
+                         Dark="{StaticResource DarkTextPrimary}" />
+    </Color>
+
+    <Color x:Key="TextSecondary">
+        <AppThemeBinding Light="{StaticResource LightTextSecondary}" 
+                         Dark="{StaticResource DarkTextSecondary}" />
+    </Color>
+
+    <Color x:Key="Border">
+        <AppThemeBinding Light="{StaticResource LightBorder}" 
+                         Dark="{StaticResource DarkBorder}" />
+    </Color>
+
+    <Color x:Key="Divider">
+        <AppThemeBinding Light="{StaticResource LightDivider}" 
+                         Dark="{StaticResource DarkDivider}" />
+    </Color>
+
+</ResourceDictionary>

@@ -137,10 +137,10 @@ public class ResultadoEnduroService : IResultadoEnduroService
             NomeEvento = etapa.Evento.Nome,
             DataEtapa = etapa.DataHora,
 
-            NumeroVoltas = etapa.NumeroVoltas,
-            NumeroEspeciais = etapa.NumeroEspeciais,
+            NumeroVoltas = etapa.NumeroVoltas ?? 0,
+            NumeroEspeciais = etapa.NumeroEspeciais ?? 0,
             PrimeiraVoltaValida = etapa.PrimeiraVoltaValida,
-            PenalidadePorFaltaSegundos = etapa.PenalidadePorFaltaSegundos,
+            PenalidadePorFaltaSegundos = etapa.PenalidadePorFaltaSegundos ?? 0,
 
             TotalInscritos = inscricoes.Count,
             TotalClassificados = resultados.Count(r => r.Status == "CLASSIFICADO"),
@@ -215,7 +215,7 @@ public class ResultadoEnduroService : IResultadoEnduroService
             for (int especial = 1; especial <= etapa.NumeroEspeciais; especial++)
             {
                 var resultadoEspecial = CalcularTempoEspecial(
-                    tempos, volta, especial, etapa.PenalidadePorFaltaSegundos);
+                    tempos, volta, especial, etapa.PenalidadePorFaltaSegundos ?? 0);
 
                 resultadoVolta.Especiais.Add(resultadoEspecial);
 
@@ -257,8 +257,9 @@ public class ResultadoEnduroService : IResultadoEnduroService
         }
 
         // Calcular total de especiais esperadas (apenas voltas válidas)
-        int voltasValidas = etapa.PrimeiraVoltaValida ? etapa.NumeroVoltas : etapa.NumeroVoltas - 1;
-        resultado.TotalEspeciais = voltasValidas * etapa.NumeroEspeciais;
+        int voltasValidas = etapa.PrimeiraVoltaValida
+            ? (etapa.NumeroVoltas ?? 0)
+            : (etapa.NumeroVoltas ?? 1) - 1; resultado.TotalEspeciais = voltasValidas * etapa.NumeroEspeciais ?? 0;
 
         // Preencher resultado
         resultado.TempoTotalSegundos = tempoTotal;

@@ -1,151 +1,129 @@
-﻿using DevNationCrono.API.Configuration;
-using DevNationCrono.API.Models.Entities;
-using DevNationCrono.API.Services.Interfaces;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using DevNationCrono.API.Models.Entities;
+using DevNationCrono.API.Services.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 
 namespace DevNationCrono.API.Services.Implementations;
 
 public class TokenService : ITokenService
 {
-    private readonly JwtSettings _jwtSettings;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<TokenService> _logger;
 
-    public TokenService(
-        IOptions<JwtSettings> jwtSettings,
-        ILogger<TokenService> logger)
+    public TokenService(IConfiguration configuration, ILogger<TokenService> logger)
     {
-        _jwtSettings = jwtSettings.Value;
+        _configuration = configuration;
         _logger = logger;
     }
 
     public string GerarTokenPiloto(Piloto piloto)
     {
-        var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, piloto.Id.ToString()),
-                new Claim(ClaimTypes.Name, piloto.Nome),
-                new Claim(ClaimTypes.Email, piloto.Email),
-                new Claim(ClaimTypes.Role, "Piloto"),
-                new Claim("cpf", piloto.Cpf),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-        return GerarToken(claims);
-    }
-
-    public string GerarTokenColetor(DispositivoColetor coletor)
-    {
-        var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, coletor.Id.ToString()),
-                new Claim(ClaimTypes.Name, coletor.Nome),
-                new Claim(ClaimTypes.Role, "Coletor"),
-                new Claim("deviceId", coletor.DeviceId),
-                new Claim("idEvento", coletor.IdEvento.ToString()),
-                new Claim("idEtapa", coletor.IdEtapa.ToString()),
-                new Claim("tipo", coletor.Tipo),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-        if (coletor.IdEspecial.HasValue)
+        var claims = new[]
         {
-            claims.Add(new Claim("idEspecial", coletor.IdEspecial.Value.ToString()));
-        }
+            new Claim(ClaimTypes.NameIdentifier, piloto.Id.ToString()),
+            new Claim(ClaimTypes.Name, piloto.Nome),
+            new Claim(ClaimTypes.Email, piloto.Email),
+            new Claim(ClaimTypes.Role, "Piloto")
+        };
 
-        return GerarToken(claims);
+        return GerarToken(claims, TimeSpan.FromDays(7));
     }
 
-    public string GerarTokenOrganizador(int userId, string nome, string email)
+    public string GerarTokenColetor(DispositivoColetor dispositivo)
     {
-        var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Name, nome),
-                new Claim(ClaimTypes.Email, email),
-                new Claim(ClaimTypes.Role, "Organizador"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, dispositivo.Id.ToString()),
+            new Claim("DeviceId", dispositivo.DeviceId),
+            new Claim(ClaimTypes.Name, dispositivo.Nome ?? dispositivo.DeviceId),
+            new Claim(ClaimTypes.Role, "Coletor"),
+            new Claim("TipoPonto", dispositivo.Tipo)
+        };
 
-        return GerarToken(claims);
+        return GerarToken(claims, TimeSpan.FromHours(24));
     }
 
-    public string GerarTokenAdmin(int userId, string nome, string email)
+    public string GerarTokenAdmin(string nome, string email, string role)
     {
-        var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Name, nome),
-                new Claim(ClaimTypes.Email, email),
-                new Claim(ClaimTypes.Role, "Admin"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.Name, nome),
+            new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Role, role)
+        };
 
-        return GerarToken(claims);
+        return GerarToken(claims, TimeSpan.FromHours(8));
     }
 
-    private string GerarToken(List<Claim> claims)
-    {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: _jwtSettings.Issuer,
-            audience: _jwtSettings.Audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddHours(_jwtSettings.ExpirationHours),
-            signingCredentials: credentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    public ClaimsPrincipal? ValidarToken(string token)
+    public bool ValidarToken(string token)
     {
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtSettings.Secret);
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"] ?? "ChaveSecretaPadrao123456789012345678901234");
 
-            var validationParameters = new TokenValidationParameters
+            tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = _jwtSettings.Issuer,
-                ValidAudience = _jwtSettings.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = _configuration["Jwt:Issuer"],
+                ValidateAudience = true,
+                ValidAudience = _configuration["Jwt:Audience"],
+                ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
-            };
+            }, out _);
 
-            var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
-            return principal;
+            return true;
         }
-        catch (Exception ex)
+        catch
         {
-            _logger.LogWarning(ex, "Token inválido");
+            return false;
+        }
+    }
+
+    public int? ObterIdDoToken(string token)
+    {
+        try
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(token);
+            var idClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+            if (idClaim != null && int.TryParse(idClaim.Value, out var id))
+            {
+                return id;
+            }
+
+            return null;
+        }
+        catch
+        {
             return null;
         }
     }
 
-    public int? ObterUserIdDoToken(string token)
+    private string GerarToken(Claim[] claims, TimeSpan expiracao)
     {
-        var principal = ValidarToken(token);
-        if (principal == null) return null;
+        var key = Encoding.ASCII.GetBytes(
+            _configuration["Jwt:Secret"] ?? "ChaveSecretaPadrao123456789012345678901234");
 
-        var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim == null) return null;
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.Add(expiracao),
+            Issuer = _configuration["Jwt:Issuer"],
+            Audience = _configuration["Jwt:Audience"],
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature)
+        };
 
-        return int.TryParse(userIdClaim.Value, out var userId) ? userId : null;
-    }
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.CreateToken(tokenDescriptor);
 
-    public string? ObterRoleDoToken(string token)
-    {
-        var principal = ValidarToken(token);
-        return principal?.FindFirst(ClaimTypes.Role)?.Value;
+        return tokenHandler.WriteToken(token);
     }
 }

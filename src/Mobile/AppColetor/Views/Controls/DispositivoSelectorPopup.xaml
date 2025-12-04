@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AppColetor.Services.Interfaces"
+             x:Class="AppColetor.Views.Controls.DispositivoSelectorPopup"
+             x:DataType="vm:SerialDeviceInfo">
+
+    <Frame BackgroundColor="{StaticResource BackgroundMedium}"
+           BorderColor="{StaticResource BackgroundLight}"
+           CornerRadius="12"
+           Padding="16"
+           HasShadow="True"
+           Margin="20">
+
+        <VerticalStackLayout Spacing="16">
+
+            <!-- Título -->
+            <Label Text="Selecionar Dispositivo USB"
+                   Style="{StaticResource LabelTitulo}"
+                   HorizontalTextAlignment="Center" />
+
+            <!-- Lista de dispositivos -->
+            <CollectionView x:Name="ListaDispositivos"
+                            SelectionMode="Single"
+                            HeightRequest="200">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SerialDeviceInfo">
+                        <Frame BackgroundColor="{StaticResource BackgroundLight}"
+                               BorderColor="Transparent"
+                               CornerRadius="8"
+                               Padding="12"
+                               Margin="0,4">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+
+                                <!-- Ícone -->
+                                <Label Grid.Column="0"
+                                       Text="🔌"
+                                       FontSize="24"
+                                       VerticalTextAlignment="Center" />
+
+                                <!-- Info -->
+                                <VerticalStackLayout Grid.Column="1" Margin="12,0">
+                                    <Label Text="{Binding Name}"
+                                           FontAttributes="Bold"
+                                           FontSize="14" />
+                                    <Label Text="{Binding ChipType}"
+                                           TextColor="{StaticResource TextSecondary}"
+                                           FontSize="12" />
+                                    <Label FontSize="10"
+                                           TextColor="{StaticResource TextMuted}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="VID:" />
+                                                <Span Text="{Binding VendorId, StringFormat='{0:X4}'}" />
+                                                <Span Text=" PID:" />
+                                                <Span Text="{Binding ProductId, StringFormat='{0:X4}'}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                </VerticalStackLayout>
+
+                                <!-- Status permissão -->
+                                <Label Grid.Column="2"
+                                       Text="{Binding HasPermission, Converter={StaticResource PermissionStatusConverter}}"
+                                       FontSize="12"
+                                       VerticalTextAlignment="Center" />
+
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout VerticalOptions="Center" 
+                                         HorizontalOptions="Center"
+                                         Padding="20">
+                        <Label Text="🔍"
+                               FontSize="48"
+                               HorizontalTextAlignment="Center" />
+                        <Label Text="Nenhum dispositivo USB encontrado"
+                               Style="{StaticResource LabelSubtitulo}"
+                               HorizontalTextAlignment="Center" />
+                        <Label Text="Conecte um coletor USB e tente novamente"
+                               Style="{StaticResource LabelMuted}"
+                               HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+            </CollectionView>
+
+            <!-- Botão Atualizar -->
+            <Button x:Name="BtnAtualizar"
+                    Text="🔄 Atualizar Lista"
+                    Style="{StaticResource ButtonOutline}"
+                    Clicked="OnAtualizarClicked" />
+
+            <!-- Botões -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Grid.Column="0"
+                        x:Name="BtnCancelar"
+                        Text="Cancelar"
+                        Style="{StaticResource ButtonOutline}"
+                        Clicked="OnCancelarClicked" />
+
+                <Button Grid.Column="1"
+                        x:Name="BtnConectar"
+                        Text="Conectar"
+                        Style="{StaticResource ButtonSuccess}"
+                        Clicked="OnConectarClicked"
+                        IsEnabled="False" />
+            </Grid>
+
+        </VerticalStackLayout>
+    </Frame>
+
+</ContentView>
