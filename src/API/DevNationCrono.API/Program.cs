@@ -1,10 +1,11 @@
-using AutoMapper;
 using DevNationCrono.API.Configuration;
 using DevNationCrono.API.Data;
 using DevNationCrono.API.Hubs;
 using DevNationCrono.API.Middlewares;
+using DevNationCrono.API.Repositories;
 using DevNationCrono.API.Repositories.Implementations;
 using DevNationCrono.API.Repositories.Interfaces;
+using DevNationCrono.API.Services;
 using DevNationCrono.API.Services.Background;
 using DevNationCrono.API.Services.Implementations;
 using DevNationCrono.API.Services.Interfaces;
@@ -12,11 +13,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Reflection;
+using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,7 +55,9 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtSettings.Secret)
             ),
-            ClockSkew = TimeSpan.Zero // Remove os 5 min de tolerância padrão
+            ClockSkew = TimeSpan.Zero ,// Remove os 5 min de tolerância padrão
+            RoleClaimType = ClaimTypes.Role,
+            NameClaimType = ClaimTypes.Name
         };
 
         // Eventos para debug
@@ -119,6 +121,7 @@ builder.Services.AddScoped<IEtapaRepository, EtapaRepository>();
 builder.Services.AddScoped<IInscricaoRepository, InscricaoRepository>();
 builder.Services.AddScoped<IPagamentoRepository, PagamentoRepository>();
 builder.Services.AddScoped<ITempoRepository, TempoRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IDispositivoColetorRepository, DispositivoColetorRepository>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -133,6 +136,7 @@ builder.Services.AddScoped<IResultadoEnduroService, ResultadoEnduroService>();
 builder.Services.AddScoped<IResultadoCircuitoService, ResultadoCircuitoService>();
 builder.Services.AddScoped<INotificacaoTempoRealService, NotificacaoTempoRealService>();
 builder.Services.AddScoped<IExportacaoService, ExportacaoService>();
+builder.Services.AddScoped<ICampeonatoService, CampeonatoService>();
 
 
 
@@ -171,6 +175,10 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    })
     .ConfigureApiBehaviorOptions(options =>
     {
         options.SuppressModelStateInvalidFilter = false;

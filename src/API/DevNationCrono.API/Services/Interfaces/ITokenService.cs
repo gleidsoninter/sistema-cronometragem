@@ -10,4 +10,5 @@ public interface ITokenService
     string GerarTokenAdmin(string nome, string email, string role);
     bool ValidarToken(string token);
     int? ObterIdDoToken(string token);
+    string GerarTokenUsuario(Usuario usuario);
 }

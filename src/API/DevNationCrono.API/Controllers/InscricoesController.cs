@@ -179,7 +179,7 @@ public class InscricoesController : ControllerBase
     /// Inscrição própria do piloto logado
     /// </summary>
     [HttpPost("auto-inscricao")]
-    [Authorize(Roles = "Piloto")]
+    [Authorize]
     [ProducesResponseType(typeof(InscricaoDto), 201)]
     [ProducesResponseType(400)]
     public async Task<ActionResult<InscricaoDto>> AutoInscricao([FromBody] AutoInscricaoDto dto)

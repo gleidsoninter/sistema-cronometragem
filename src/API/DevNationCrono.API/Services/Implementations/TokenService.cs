@@ -62,16 +62,16 @@ public class TokenService : ITokenService
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"] ?? "ChaveSecretaPadrao123456789012345678901234");
+            var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:Secret"] ?? "X7q9m2vK4nL8wP1zR5jH3bM6tF0yG2cD");
 
             tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateIssuer = true,
-                ValidIssuer = _configuration["Jwt:Issuer"],
+                ValidIssuer = _configuration["JwtSettings:Issuer"],
                 ValidateAudience = true,
-                ValidAudience = _configuration["Jwt:Audience"],
+                ValidAudience = _configuration["JwtSettings:Audience"],
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
             }, out _);
@@ -108,14 +108,14 @@ public class TokenService : ITokenService
     private string GerarToken(Claim[] claims, TimeSpan expiracao)
     {
         var key = Encoding.ASCII.GetBytes(
-            _configuration["Jwt:Secret"] ?? "ChaveSecretaPadrao123456789012345678901234");
+            _configuration["JwtSettings:Secret"] ?? "X7q9m2vK4nL8wP1zR5jH3bM6tF0yG2cD");
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.Add(expiracao),
-            Issuer = _configuration["Jwt:Issuer"],
-            Audience = _configuration["Jwt:Audience"],
+            Issuer = _configuration["JwtSettings:Issuer"],
+            Audience = _configuration["JwtSettings:Audience"],
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature)
@@ -125,5 +125,33 @@ public class TokenService : ITokenService
         var token = tokenHandler.CreateToken(tokenDescriptor);
 
         return tokenHandler.WriteToken(token);
+    }
+
+    /// <summary>
+    /// Gera token JWT para usuário administrativo (Admin/Organizador)
+    /// </summary>
+    public string GerarTokenUsuario(Usuario usuario)
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+            new Claim(ClaimTypes.Name, usuario.Nome),
+            new Claim(ClaimTypes.Email, usuario.Email),
+            new Claim(ClaimTypes.Role, usuario.Role),  // ← Role dinâmica: Admin ou Organizador
+            new Claim("tipo", "Usuario")
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]!));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _configuration["JwtSettings:Issuer"],
+            audience: _configuration["JwtSettings:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(24),
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

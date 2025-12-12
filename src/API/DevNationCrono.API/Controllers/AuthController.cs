@@ -15,17 +15,20 @@ public class AuthController : ControllerBase
 {
     private readonly IPilotoRepository _pilotoRepository;
     private readonly IDispositivoColetorRepository _dispositivoRepository;  // ✅ Adicionado
+    private readonly IUsuarioRepository _usuarioRepository;
     private readonly ITokenService _tokenService;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         IPilotoRepository pilotoRepository,
         IDispositivoColetorRepository dispositivoRepository,  // ✅ Adicionado
+        IUsuarioRepository usuarioRepository,
         ITokenService tokenService,
         ILogger<AuthController> logger)
     {
         _pilotoRepository = pilotoRepository;
         _dispositivoRepository = dispositivoRepository;  // ✅ Adicionado
+        _usuarioRepository = usuarioRepository;
         _tokenService = tokenService;
         _logger = logger;
     }
@@ -306,4 +309,84 @@ public class AuthController : ControllerBase
             });
         }
     }
+
+    /// <summary>
+    /// Login de administrador/organizador
+    /// </summary>
+    [HttpPost("login/admin")]
+    [AllowAnonymous]
+    public async Task<ActionResult<LoginResponseDto>> LoginAdmin([FromBody] LoginAdminRequestDto request)
+    {
+        try
+        {
+            // Buscar usuário por email
+            var usuario = await _usuarioRepository.GetByEmailAsync(request.Email);
+
+            if (usuario == null)
+            {
+                return Ok(new LoginResponseDto
+                {
+                    Sucesso = false,
+                    Mensagem = "Email ou senha inválidos"
+                });
+            }
+
+            // Verificar se está ativo
+            if (!usuario.Ativo)
+            {
+                return Ok(new LoginResponseDto
+                {
+                    Sucesso = false,
+                    Mensagem = "Conta desativada. Entre em contato com o suporte"
+                });
+            }
+
+            // Verificar senha
+            var senhaValida = BCrypt.Net.BCrypt.Verify(request.Senha, usuario.PasswordHash);
+
+            if (!senhaValida)
+            {
+                _logger.LogWarning("Tentativa de login admin falhou para {Email}", request.Email);
+
+                return Ok(new LoginResponseDto
+                {
+                    Sucesso = false,
+                    Mensagem = "Email ou senha inválidos"
+                });
+            }
+
+            // Atualizar último acesso
+            usuario.UltimoAcesso = DateTime.UtcNow;
+            await _usuarioRepository.UpdateAsync(usuario);
+
+            // Gerar token com a Role do usuário (Admin ou Organizador)
+            var token = _tokenService.GerarTokenUsuario(usuario);
+
+            _logger.LogInformation("Login admin bem-sucedido para {Email} com role {Role}",
+                request.Email, usuario.Role);
+
+            return Ok(new LoginResponseDto
+            {
+                Sucesso = true,
+                Token = token,
+                Usuario = new UsuarioDto
+                {
+                    Id = usuario.Id,
+                    Nome = usuario.Nome,
+                    Email = usuario.Email,
+                    Role = usuario.Role  // ← Admin ou Organizador
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro no login admin");
+            return StatusCode(500, new LoginResponseDto
+            {
+                Sucesso = false,
+                Mensagem = "Erro interno do servidor"
+            });
+        }
+    }
+
 }

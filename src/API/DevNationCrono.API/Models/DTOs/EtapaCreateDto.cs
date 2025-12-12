@@ -20,10 +20,10 @@ public class EtapaCreateDto
 
     // Configurações ENDURO
     [Range(1, 20)]
-    public int NumeroEspeciais { get; set; } = 1;
+    public int? NumeroEspeciais { get; set; }
 
     [Range(1, 10)]
-    public int NumeroVoltas { get; set; } = 1;
+    public int? NumeroVoltas { get; set; }
 
     public bool PrimeiraVoltaValida { get; set; } = true;
 
@@ -35,7 +35,7 @@ public class EtapaCreateDto
     public int? DuracaoCorridaMinutos { get; set; }
 
     [Range(1, 5)]
-    public int VoltasAposTempoMinimo { get; set; } = 2;
+    public int VoltasAposTempoMinimo { get; set; } = 1;
 
     [StringLength(1000)]
     public string? Observacoes { get; set; }

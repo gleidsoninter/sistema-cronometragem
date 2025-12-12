@@ -288,13 +288,6 @@ public class ResultadoCircuitoService : IResultadoCircuitoService
             }
         }
 
-        // Verificar se está ativo (última passagem recente)
-        var tempoSemPassagem = DateTime.UtcNow - passagens.Last().Timestamp;
-        if (tempoSemPassagem > TimeSpan.FromMinutes(5) && etapa.Status == "EM_ANDAMENTO")
-        {
-            return "ABANDONO";
-        }
-
         return "CORRENDO";
     }
 
@@ -318,10 +311,9 @@ public class ResultadoCircuitoService : IResultadoCircuitoService
 
     private void AtribuirPosicoes(List<ResultadoPilotoCircuitoDto> resultados)
     {
-        // Posição geral
+        // Posição geral - TODOS que têm voltas completadas recebem posição
         int posicaoGeral = 1;
-        foreach (var resultado in resultados.Where(r =>
-            r.Status == "CORRENDO" || r.Status == "FINALIZADO"))
+        foreach (var resultado in resultados.Where(r => r.VoltasCompletadas > 0))
         {
             resultado.PosicaoGeral = posicaoGeral++;
         }
@@ -332,8 +324,7 @@ public class ResultadoCircuitoService : IResultadoCircuitoService
         {
             int posicaoCategoria = 1;
             var daCategoria = resultados
-                .Where(r => r.IdCategoria == idCategoria &&
-                           (r.Status == "CORRENDO" || r.Status == "FINALIZADO"))
+                .Where(r => r.IdCategoria == idCategoria && r.VoltasCompletadas > 0)
                 .OrderBy(r => r.PosicaoGeral);
 
             foreach (var resultado in daCategoria)
@@ -342,7 +333,6 @@ public class ResultadoCircuitoService : IResultadoCircuitoService
             }
         }
     }
-
     private void CalcularDiferencas(List<ResultadoPilotoCircuitoDto> resultados)
     {
         var classificados = resultados

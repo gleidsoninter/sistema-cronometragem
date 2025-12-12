@@ -9,6 +9,8 @@ public class Evento
     [Key]
     public int Id { get; set; }
 
+    public int? IdCampeonato { get; set; }
+
     [Required]
     [MaxLength(200)]
     public string Nome { get; set; }
@@ -61,6 +63,8 @@ public class Evento
     [ForeignKey("IdModalidade")]
     public virtual Modalidade Modalidade { get; set; }
 
+    [ForeignKey("IdCampeonato")]
+    public virtual Campeonato Campeonato { get; set; } = null!;
     public virtual ICollection<Etapa> Etapas { get; set; }
     public virtual ICollection<Categoria> Categorias { get; set; }
     public virtual ICollection<Inscricao> Inscricoes { get; set; }

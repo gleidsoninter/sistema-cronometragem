@@ -4,6 +4,11 @@ namespace DevNationCrono.API.Models.DTOs;
 
 public class EtapaUpdateDto
 {
+    /// <summary>
+    /// ID do campeonato. Use null para desvincular do campeonato.
+    /// </summary>
+    public int? IdCampeonato { get; set; }
+
     [StringLength(100, MinimumLength = 3)]
     public string? Nome { get; set; }
 

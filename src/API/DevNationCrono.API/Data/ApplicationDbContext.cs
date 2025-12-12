@@ -23,6 +23,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<Pagamento> Pagamentos { get; set; }
     public DbSet<Configuracao> Configuracoes { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
+    public DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<Campeonato> Campeonatos { get; set; }
+    public DbSet<CampeonatoPontuacao> CampeonatoPontuacoes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

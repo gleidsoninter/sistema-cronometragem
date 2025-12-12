@@ -4,6 +4,11 @@ namespace DevNationCrono.API.Models.DTOs;
 
 public class EventoCreateDto
 {
+    /// <summary>
+    /// ID do campeonato (opcional). Se preenchido, vincula o evento ao campeonato.
+    /// </summary>
+    public int? IdCampeonato { get; set; }
+
     [Required(ErrorMessage = "Nome é obrigatório")]
     [StringLength(200, MinimumLength = 5, ErrorMessage = "Nome deve ter entre 5 e 200 caracteres")]
     public string Nome { get; set; }

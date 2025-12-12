@@ -13,7 +13,7 @@ namespace DevNationCrono.API.Controllers;
 [Route("api/v{version:apiVersion}/[controller]")]
 [Produces("application/json")]
 [Tags("Pilotos")]
-[Authorize]
+//[Authorize]
 public class PilotosController : ControllerBase
 {
     private readonly IPilotoService _pilotoService;
@@ -51,6 +51,7 @@ public class PilotosController : ControllerBase
     /// Busca piloto por ID
     /// </summary>
     [HttpGet("{id}")]
+    [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(PilotoResponseDto), 200)]
     [ProducesResponseType(404)]
     public async Task<ActionResult<PilotoResponseDto>> GetById(int id)
@@ -83,6 +84,7 @@ public class PilotosController : ControllerBase
     /// <response code="500">Erro interno do servidor</response>
     [HttpPost]
     [AllowAnonymous]
+    [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(PilotoResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -96,6 +98,8 @@ public class PilotosController : ControllerBase
     /// Atualiza dados do piloto
     /// </summary>
     [HttpPut("{id}")]
+    [MapToApiVersion("1.0")]
+    [Authorize]
     [ProducesResponseType(typeof(PilotoResponseDto), 200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
@@ -120,6 +124,7 @@ public class PilotosController : ControllerBase
     /// <summary>
     /// Deleta piloto (soft delete)
     /// </summary>
+    [MapToApiVersion("1.0")]
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(204)]
@@ -134,6 +139,7 @@ public class PilotosController : ControllerBase
     /// Retorna dados do piloto logado
     /// </summary>
     [HttpGet("perfil")]
+    [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(PilotoResponseDto), 200)]
     public async Task<ActionResult<PilotoResponseDto>> GetPerfil()
     {
@@ -153,8 +159,9 @@ public class PilotosController : ControllerBase
     /// <summary>
     /// Lista pilotos com paginação e filtros
     /// </summary>
-    [HttpGet]
+    [HttpGet("paginado")]
     [Authorize(Roles = "Admin,Organizador")]
+    [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(PagedResult<PilotoResponseDto>), 200)]
     public async Task<ActionResult<PagedResult<PilotoResponseDto>>> GetPaged(
         [FromQuery] PilotoFilterParams filterParams)
@@ -168,6 +175,7 @@ public class PilotosController : ControllerBase
     /// </summary>
     [HttpGet("cpf/{cpf}")]
     [Authorize(Roles = "Admin,Organizador")]
+    [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(PilotoResponseDto), 200)]
     [ProducesResponseType(404)]
     public async Task<ActionResult<PilotoResponseDto>> GetByCpf(string cpf)
