@@ -22,21 +22,21 @@ public class CategoriaRepository : ICategoriaRepository
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
-    public async Task<List<Categoria>> GetByEventoAsync(int idEvento)
+    public async Task<List<Categoria>> GetByModalidadeAsync(int idModalidade)
     {
         return await _context.Categorias
             .Include(c => c.Modalidade)
-            .Where(c => c.IdEvento == idEvento)
+            .Where(c => c.IdModalidade == idModalidade)
             .OrderBy(c => c.Ordem)
             .ThenBy(c => c.Nome)
             .ToListAsync();
     }
 
-    public async Task<List<Categoria>> GetActivesByEventoAsync(int idEvento)
+    public async Task<List<Categoria>> GetActivesByModalidadeAsync(int idModalidade)
     {
         return await _context.Categorias
             .Include(c => c.Modalidade)
-            .Where(c => c.IdEvento == idEvento && c.Ativo)
+            .Where(c => c.IdModalidade == idModalidade && c.Ativo)
             .OrderBy(c => c.Ordem)
             .ThenBy(c => c.Nome)
             .ToListAsync();
@@ -70,10 +70,10 @@ public class CategoriaRepository : ICategoriaRepository
         return await _context.Categorias.AnyAsync(c => c.Id == id);
     }
 
-    public async Task<bool> NomeExistsNoEventoAsync(string nome, int idEvento, int? excludeId = null)
+    public async Task<bool> NomeExistsNaModalidadeAsync(string nome, int idModalidade, int? excludeId = null)
     {
         var query = _context.Categorias
-            .Where(c => c.Nome.ToLower() == nome.ToLower() && c.IdEvento == idEvento);
+            .Where(c => c.Nome.ToLower() == nome.ToLower() && c.IdModalidade == idModalidade);
 
         if (excludeId.HasValue)
         {

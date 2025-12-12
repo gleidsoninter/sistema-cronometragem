@@ -12,12 +12,12 @@ public interface ICategoriaService
     /// <summary>
     /// Lista todas as categorias de um evento específico (incluindo as inativas).
     /// </summary>
-    Task<List<CategoriaDto>> GetByEventoAsync(int idEvento);
+    Task<List<CategoriaDto>> GetByModalidadeAsync(int idModalidade);
 
     /// <summary>
     /// Lista apenas categorias ativas de um evento, retornando um DTO resumido (ideal para combobox/selects no front).
     /// </summary>
-    Task<List<CategoriaResumoDto>> GetActivesByEventoAsync(int idEvento);
+    Task<List<CategoriaResumoDto>> GetActivesByModalidadeAsync(int idModalidade);
 
     /// <summary>
     /// Cria uma nova categoria com validações de regras de negócio (idade, cilindrada, unicidade de nome).

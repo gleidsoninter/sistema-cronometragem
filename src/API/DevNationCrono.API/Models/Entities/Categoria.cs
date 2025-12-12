@@ -10,9 +10,6 @@ public class Categoria
     public int Id { get; set; }
 
     [Required]
-    public int IdEvento { get; set; }
-
-    [Required]
     public int IdModalidade { get; set; }
 
     [Required]

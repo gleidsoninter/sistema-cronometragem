@@ -28,9 +28,9 @@ public class CategoriasController : ControllerBase
     [HttpGet("evento/{idEvento}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(List<CategoriaDto>), 200)]
-    public async Task<ActionResult<List<CategoriaDto>>> GetByEvento(int idEvento)
+    public async Task<ActionResult<List<CategoriaDto>>> GetByModalidade(int idModalidade)
     {
-        var categorias = await _categoriaService.GetByEventoAsync(idEvento);
+        var categorias = await _categoriaService.GetByModalidadeAsync(idModalidade);
         return Ok(categorias);
     }
 

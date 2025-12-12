@@ -42,9 +42,9 @@ public class CategoriaService : ICategoriaService
         return dto;
     }
 
-    public async Task<List<CategoriaDto>> GetByEventoAsync(int idEvento)
+    public async Task<List<CategoriaDto>> GetByModalidadeAsync(int idModalidade)
     {
-        var categorias = await _categoriaRepository.GetByEventoAsync(idEvento);
+        var categorias = await _categoriaRepository.GetByModalidadeAsync(idModalidade);
         var dtos = _mapper.Map<List<CategoriaDto>>(categorias);
 
         foreach (var dto in dtos)
@@ -55,9 +55,9 @@ public class CategoriaService : ICategoriaService
         return dtos;
     }
 
-    public async Task<List<CategoriaResumoDto>> GetActivesByEventoAsync(int idEvento)
+    public async Task<List<CategoriaResumoDto>> GetActivesByModalidadeAsync(int idModalidade)
     {
-        var categorias = await _categoriaRepository.GetActivesByEventoAsync(idEvento);
+        var categorias = await _categoriaRepository.GetByModalidadeAsync(idModalidade);
         var dtos = _mapper.Map<List<CategoriaResumoDto>>(categorias);
 
         foreach (var dto in dtos)
@@ -98,10 +98,10 @@ public class CategoriaService : ICategoriaService
         }
 
         // Validar nome único no evento
-        if (await _categoriaRepository.NomeExistsNoEventoAsync(dto.Nome, dto.IdEvento))
+        if (await _categoriaRepository.NomeExistsNaModalidadeAsync(dto.Nome, dto.IdModalidade))
         {
             throw new ValidationException(
-                $"Já existe uma categoria '{dto.Nome}' neste evento");
+                $"Já existe uma categoria '{dto.Nome}' nesta modalidade");
         }
 
         // Validar idade
@@ -166,7 +166,7 @@ public class CategoriaService : ICategoriaService
 
         // Validar nome único
         if (!string.IsNullOrEmpty(dto.Nome) &&
-            await _categoriaRepository.NomeExistsNoEventoAsync(dto.Nome, categoria.IdEvento, id))
+            await _categoriaRepository.NomeExistsNaModalidadeAsync(dto.Nome, categoria.IdModalidade, id))
         {
             throw new ValidationException(
                 $"Já existe uma categoria '{dto.Nome}' neste evento");
