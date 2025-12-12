@@ -30,8 +30,17 @@ public class EtapasController : ControllerBase
     [ProducesResponseType(typeof(List<EtapaDto>), 200)]
     public async Task<ActionResult<List<EtapaDto>>> GetByEvento(int idEvento)
     {
-        var etapas = await _etapaService.GetByEventoAsync(idEvento);
-        return Ok(etapas);
+        try
+        {
+            var etapas = await _etapaService.GetByEventoAsync(idEvento);
+            return Ok(etapas);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+
     }
 
     /// <summary>

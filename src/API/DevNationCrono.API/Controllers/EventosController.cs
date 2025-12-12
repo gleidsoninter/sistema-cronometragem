@@ -28,6 +28,7 @@ public class EventosController : ControllerBase
     /// Lista eventos com paginação e filtros
     /// </summary>
     [HttpGet]
+    [MapToApiVersion("1.0")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(PagedResult<EventoResumoDto>), 200)]
     public async Task<ActionResult<PagedResult<EventoResumoDto>>> GetPaged(
@@ -41,6 +42,7 @@ public class EventosController : ControllerBase
     /// Lista eventos ativos
     /// </summary>
     [HttpGet("ativos")]
+    [MapToApiVersion("1.0")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(List<EventoResumoDto>), 200)]
     public async Task<ActionResult<List<EventoResumoDto>>> GetActives()
@@ -54,6 +56,7 @@ public class EventosController : ControllerBase
     /// </summary>
     [HttpGet("proximos")]
     [AllowAnonymous]
+    [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(List<EventoResumoDto>), 200)]
     public async Task<ActionResult<List<EventoResumoDto>>> GetProximos(
         [FromQuery] int quantidade = 5)
@@ -67,6 +70,7 @@ public class EventosController : ControllerBase
     /// </summary>
     [HttpGet("{id}")]
     [AllowAnonymous]
+    [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(EventoDto), 200)]
     [ProducesResponseType(404)]
     public async Task<ActionResult<EventoDto>> GetById(int id)
@@ -83,6 +87,7 @@ public class EventosController : ControllerBase
     /// Cria novo evento
     /// </summary>
     [HttpPost]
+    [MapToApiVersion("1.0")]
     [Authorize(Roles = "Admin,Organizador")]
     [ProducesResponseType(typeof(EventoDto), 201)]
     [ProducesResponseType(400)]
@@ -96,6 +101,7 @@ public class EventosController : ControllerBase
     /// Atualiza evento
     /// </summary>
     [HttpPut("{id}")]
+    [MapToApiVersion("1.0")]
     [Authorize(Roles = "Admin,Organizador")]
     [ProducesResponseType(typeof(EventoDto), 200)]
     [ProducesResponseType(400)]
@@ -110,6 +116,7 @@ public class EventosController : ControllerBase
     /// Abre inscrições do evento
     /// </summary>
     [HttpPost("{id}/abrir-inscricoes")]
+    [MapToApiVersion("1.0")]
     [Authorize(Roles = "Admin,Organizador")]
     [ProducesResponseType(typeof(EventoDto), 200)]
     [ProducesResponseType(400)]
@@ -124,6 +131,7 @@ public class EventosController : ControllerBase
     /// Fecha inscrições do evento
     /// </summary>
     [HttpPost("{id}/fechar-inscricoes")]
+    [MapToApiVersion("1.0")]
     [Authorize(Roles = "Admin,Organizador")]
     [ProducesResponseType(typeof(EventoDto), 200)]
     [ProducesResponseType(400)]
@@ -138,6 +146,7 @@ public class EventosController : ControllerBase
     /// Altera status do evento
     /// </summary>
     [HttpPatch("{id}/status")]
+    [MapToApiVersion("1.0")]
     [Authorize(Roles = "Admin,Organizador")]
     [ProducesResponseType(typeof(EventoDto), 200)]
     [ProducesResponseType(400)]
@@ -155,6 +164,7 @@ public class EventosController : ControllerBase
     /// </summary>
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
+    [MapToApiVersion("1.0")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]

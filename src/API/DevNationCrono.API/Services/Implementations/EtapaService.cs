@@ -45,17 +45,26 @@ public class EtapaService : IEtapaService
 
     public async Task<List<EtapaDto>> GetByEventoAsync(int idEvento)
     {
-        var etapas = await _etapaRepository.GetByEventoAsync(idEvento);
-        var dtos = new List<EtapaDto>();
-
-        foreach (var etapa in etapas)
+        try
         {
-            var dto = MapearParaDto(etapa);
-            await PreencherContagens(dto);
-            dtos.Add(dto);
-        }
+            var etapas = await _etapaRepository.GetByEventoAsync(idEvento);
+            var dtos = new List<EtapaDto>();
 
-        return dtos;
+            foreach (var etapa in etapas)
+            {
+                var dto = MapearParaDto(etapa);
+                await PreencherContagens(dto);
+                dtos.Add(dto);
+            }
+
+            return dtos;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }    
+
     }
 
     public async Task<EtapaDto> CreateAsync(EtapaCreateDto dto)
