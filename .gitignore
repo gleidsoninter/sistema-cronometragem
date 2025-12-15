@@ -54,3 +54,5 @@ Thumbs.db
 # Temporary files
 *.tmp
 *~
+/src/API/DevNationCrono.API/Properties/launchSettings.json
+/src/API/DevNationCrono.API/appsettings.json
