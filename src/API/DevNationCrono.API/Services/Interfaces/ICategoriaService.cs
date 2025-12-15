@@ -33,4 +33,7 @@ public interface ICategoriaService
     /// Remove uma categoria (Soft Delete ou Hard Delete dependendo do repo), desde que não tenha inscritos.
     /// </summary>
     Task DeleteAsync(int id);
+
+    Task<List<CategoriaResumoDto>> GetActivesByEtapaAsync(int idEtapa);
+    Task<List<CategoriaDto>> GetByEtapaAsync(int idEtapa);
 }

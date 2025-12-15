@@ -74,6 +74,38 @@ public class CategoriaService : ICategoriaService
         return dtos;
     }
 
+    public async Task<List<CategoriaDto>> GetByEtapaAsync(int idEtapa)
+    {
+        var categorias = await _categoriaRepository.GetByEtapaAsync(idEtapa);
+        var dtos = _mapper.Map<List<CategoriaDto>>(categorias);
+
+        foreach (var dto in dtos)
+        {
+            await PreencherContagens(dto);
+        }
+
+        return dtos;
+    }
+
+    public async Task<List<CategoriaResumoDto>> GetActivesByEtapaAsync(int idEtapa)
+    {
+        var categorias = await _categoriaRepository.GetByEtapaAsync(idEtapa);
+        var dtos = _mapper.Map<List<CategoriaResumoDto>>(categorias);
+
+        foreach (var dto in dtos)
+        {
+            dto.TotalInscritos = await _categoriaRepository.CountInscritosAsync(dto.Id);
+
+            var categoria = categorias.First(c => c.Id == dto.Id);
+            if (categoria.VagasLimitadas && categoria.NumeroVagas.HasValue)
+            {
+                dto.VagasDisponiveis = categoria.NumeroVagas.Value - dto.TotalInscritos;
+            }
+        }
+
+        return dtos;
+    }
+
     public async Task<CategoriaDto> CreateAsync(CategoriaCreateDto dto)
     {
         // Validar evento existe
@@ -154,14 +186,6 @@ public class CategoriaService : ICategoriaService
         if (categoria == null)
         {
             throw new NotFoundException($"Categoria com ID {id} não encontrada");
-        }
-
-        // Verificar se evento permite alteração
-        if (categoria.Evento.Status == "FINALIZADO" ||
-            categoria.Evento.Status == "CANCELADO")
-        {
-            throw new ValidationException(
-                "Não é possível alterar categoria de evento finalizado ou cancelado");
         }
 
         // Validar nome único

@@ -28,4 +28,5 @@ public interface IResultadoCircuitoService
 
     // Cache
     Task InvalidarCacheAsync(int idEtapa);
+    Task<List<CategoriaResumoDto>> GetCategoriasEtapaAsync(int idEtapa);
 }

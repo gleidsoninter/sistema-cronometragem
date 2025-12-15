@@ -28,7 +28,6 @@ public class EventoRepository : IEventoRepository
         return await _context.Eventos
             .Include(e => e.Modalidade)
             .Include(e => e.Etapas.Where(et => et.Status != "CANCELADA"))
-            .Include(e => e.Categorias.Where(c => c.Ativo))
             .FirstOrDefaultAsync(e => e.Id == id);
     }
 
@@ -170,8 +169,11 @@ public class EventoRepository : IEventoRepository
 
     public async Task<int> CountCategoriasAsync(int id)
     {
-        return await _context.Categorias
-            .CountAsync(c => c.IdEvento == id && c.Ativo);
+        return await _context.EtapaCategorias
+            .Where(ec => ec.Etapa.IdEvento == id)
+            .Select(ec => ec.IdCategoria)
+            .Distinct()
+            .CountAsync();
     }
 
     public async Task<int> CountInscritosAsync(int id)

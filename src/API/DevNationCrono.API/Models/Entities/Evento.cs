@@ -66,7 +66,6 @@ public class Evento
     [ForeignKey("IdCampeonato")]
     public virtual Campeonato Campeonato { get; set; } = null!;
     public virtual ICollection<Etapa> Etapas { get; set; }
-    public virtual ICollection<Categoria> Categorias { get; set; }
     public virtual ICollection<Inscricao> Inscricoes { get; set; }
 }
 

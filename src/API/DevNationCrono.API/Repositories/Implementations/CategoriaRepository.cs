@@ -17,7 +17,6 @@ public class CategoriaRepository : ICategoriaRepository
     public async Task<Categoria?> GetByIdAsync(int id)
     {
         return await _context.Categorias
-            .Include(c => c.Evento)
             .Include(c => c.Modalidade)
             .FirstOrDefaultAsync(c => c.Id == id);
     }
@@ -29,6 +28,17 @@ public class CategoriaRepository : ICategoriaRepository
             .Where(c => c.IdModalidade == idModalidade)
             .OrderBy(c => c.Ordem)
             .ThenBy(c => c.Nome)
+            .ToListAsync();
+    }
+
+    public async Task<List<Categoria>> GetByEtapaAsync(int idEtapa)
+    {
+        return await _context.Set<EtapaCategoria>()
+            .Include(ec => ec.Categoria)
+            .Where(ec => ec.IdEtapa == idEtapa)
+            .OrderBy(ec => ec.OrdemLargada)
+            .ThenBy(ec => ec.Categoria.Nome)
+            .Select(ec => ec.Categoria)
             .ToListAsync();
     }
 

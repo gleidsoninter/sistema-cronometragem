@@ -33,4 +33,8 @@ public interface IEtapaService
     /// Remove uma etapa, desde que não existam leituras/tempos registrados nela.
     /// </summary>
     Task DeleteAsync(int id);
+
+    Task<List<EtapaCategoriaDto>> GetCategoriasEtapaAsync(int idEtapa);
+    Task VincularCategoriaAsync(int idEtapa, int idCategoria, int ordemLargada = 0);
+    Task DesvincularCategoriaAsync(int idEtapa, int idCategoria);
 }

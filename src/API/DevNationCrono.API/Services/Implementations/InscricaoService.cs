@@ -130,12 +130,6 @@ public class InscricaoService : IInscricaoService
             throw new NotFoundException("Categoria não encontrada ou inativa");
         }
 
-        // Validar categoria pertence ao evento
-        if (categoria.IdEvento != dto.IdEvento)
-        {
-            throw new ValidationException("Categoria não pertence a este evento");
-        }
-
         // Validar etapa
         var etapa = await _etapaRepository.GetByIdAsync(dto.IdEtapa);
         if (etapa == null || etapa.Status == "CANCELADA")
@@ -148,6 +142,9 @@ public class InscricaoService : IInscricaoService
         {
             throw new ValidationException("Etapa não pertence a este evento");
         }
+        if (categoria.IdModalidade != evento.IdModalidade)
+            throw new ValidationException(
+                "Categoria não é da mesma modalidade do evento");
 
         // Validar vagas disponíveis
         if (categoria.VagasLimitadas && categoria.NumeroVagas.HasValue)
@@ -316,11 +313,6 @@ public class InscricaoService : IInscricaoService
             if (categoria == null || !categoria.Ativo)
             {
                 throw new NotFoundException($"Categoria com ID {idCategoria} não encontrada ou inativa");
-            }
-
-            if (categoria.IdEvento != dto.IdEvento)
-            {
-                throw new ValidationException($"Categoria '{categoria.Nome}' não pertence a este evento");
             }
 
             // Verificar se já inscrito nesta categoria

@@ -120,4 +120,43 @@ public class EtapasController : ControllerBase
         await _etapaService.DeleteAsync(id);
         return NoContent();
     }
+
+    /// <summary>
+    /// Lista categorias vinculadas à etapa
+    /// </summary>
+    [HttpGet("{id}/categorias")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<EtapaCategoriaDto>), 200)]
+    public async Task<ActionResult<List<EtapaCategoriaDto>>> GetCategorias(int id)
+    {
+        var categorias = await _etapaService.GetCategoriasEtapaAsync(id);
+        return Ok(categorias);
+    }
+
+    /// <summary>
+    /// Vincula categoria à etapa
+    /// </summary>
+    [HttpPost("{id}/categorias/{idCategoria}")]
+    [Authorize(Roles = "Admin,Organizador")]
+    [ProducesResponseType(204)]
+    public async Task<IActionResult> VincularCategoria(
+        int id,
+        int idCategoria,
+        [FromBody] VincularCategoriaDto? dto = null)
+    {
+        await _etapaService.VincularCategoriaAsync(id, idCategoria, dto?.OrdemLargada ?? 0);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Desvincula categoria da etapa
+    /// </summary>
+    [HttpDelete("{id}/categorias/{idCategoria}")]
+    [Authorize(Roles = "Admin,Organizador")]
+    [ProducesResponseType(204)]
+    public async Task<IActionResult> DesvincularCategoria(int id, int idCategoria)
+    {
+        await _etapaService.DesvincularCategoriaAsync(id, idCategoria);
+        return NoContent();
+    }
 }

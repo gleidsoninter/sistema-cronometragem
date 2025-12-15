@@ -23,3 +23,9 @@ public class CategoriaDto
     public int Ordem { get; set; }
     public int TotalInscritos { get; set; }
 }
+public class VincularCategoriaDto
+{
+    public int OrdemLargada { get; set; }
+    public int? TempoMinimoMinutos { get; set; }
+    public int? NumeroVoltasEspecifico { get; set; }
+}

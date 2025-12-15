@@ -13,4 +13,5 @@ public interface ICategoriaRepository
     Task<bool> ExistsAsync(int id);
     Task<bool> NomeExistsNaModalidadeAsync(string nome, int idModalidade, int? excludeId = null);
     Task<int> CountInscritosAsync(int id);
+    Task<List<Categoria>> GetByEtapaAsync(int idEtapa);
 }

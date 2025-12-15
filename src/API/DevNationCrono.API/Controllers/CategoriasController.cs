@@ -25,7 +25,7 @@ public class CategoriasController : ControllerBase
     /// <summary>
     /// Lista categorias de um evento
     /// </summary>
-    [HttpGet("evento/{idEvento}")]
+    [HttpGet("modalidade/{idModalidade}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(List<CategoriaDto>), 200)]
     public async Task<ActionResult<List<CategoriaDto>>> GetByModalidade(int idModalidade)
@@ -34,15 +34,36 @@ public class CategoriasController : ControllerBase
         return Ok(categorias);
     }
 
+    [HttpGet("etapa/{idEtapa}")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<CategoriaDto>), 200)]
+    public async Task<ActionResult<List<CategoriaDto>>> GetByEtapa(int idEtapa)
+    {
+        var categorias = await _categoriaService.GetByEtapaAsync(idEtapa);
+        return Ok(categorias);
+    }
+
     /// <summary>
     /// Lista categorias ativas de um evento (para inscrição)
     /// </summary>
-    [HttpGet("evento/{idEvento}/ativas")]
+    [HttpGet("modalidade/{idModalidade}/ativas")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(List<CategoriaResumoDto>), 200)]
-    public async Task<ActionResult<List<CategoriaResumoDto>>> GetActivesByEvento(int idEvento)
+    public async Task<ActionResult<List<CategoriaResumoDto>>> GetActivesByModalidade(int idModalidade)
     {
-        var categorias = await _categoriaService.GetActivesByEventoAsync(idEvento);
+        var categorias = await _categoriaService.GetActivesByModalidadeAsync(idModalidade);
+        return Ok(categorias);
+    }
+
+    /// <summary>
+    /// Lista categorias ativas de um evento (para inscrição)
+    /// </summary>
+    [HttpGet("etapa/{idEtapa}/ativas")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<CategoriaResumoDto>), 200)]
+    public async Task<ActionResult<List<CategoriaResumoDto>>> GetActivesByEtapa(int idEtapa)
+    {
+        var categorias = await _categoriaService.GetActivesByEtapaAsync(idEtapa);
         return Ok(categorias);
     }
 

@@ -406,9 +406,9 @@ public class CampeonatoService : ICampeonatoService
         var eventosRealizados = eventos.Count(e => e.Status == "FINALIZADO");
 
         // Buscar todas as categorias do campeonato
-        var categorias = await _context.Categorias
-            .Where(c => c.Evento.IdCampeonato == idCampeonato && c.Ativo)
-            .Select(c => new { c.Id, c.Nome })
+        var categorias = await _context.EtapaCategorias
+            .Where(ec => ec.Etapa.Evento.IdCampeonato == idCampeonato)
+            .Select(ec => new { ec.Categoria.Id, ec.Categoria.Nome, ec.Categoria.Sigla })
             .Distinct()
             .ToListAsync();
 

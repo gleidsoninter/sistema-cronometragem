@@ -48,18 +48,15 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Modalidade, opt => opt.Ignore())
             .ForMember(dest => dest.Etapas, opt => opt.Ignore())
-            .ForMember(dest => dest.Categorias, opt => opt.Ignore())
             .ForMember(dest => dest.Inscricoes, opt => opt.Ignore());
 
         CreateMap<Categoria, CategoriaDto>()
-            .ForMember(dest => dest.NomeEvento, opt => opt.MapFrom(src => src.Evento.Nome))
             .ForMember(dest => dest.NomeModalidade, opt => opt.MapFrom(src => src.Modalidade.Nome));
 
         CreateMap<Categoria, CategoriaResumoDto>();
 
         CreateMap<CategoriaCreateDto, Categoria>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Evento, opt => opt.Ignore())
             .ForMember(dest => dest.Modalidade, opt => opt.Ignore())
             .ForMember(dest => dest.Inscricoes, opt => opt.Ignore());
 

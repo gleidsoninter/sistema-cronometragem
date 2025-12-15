@@ -17,6 +17,8 @@ public class Categoria
     public string Nome { get; set; }
 
     public string? Descricao { get; set; }
+    public string? Sigla { get; set; }
+    public string? Cor { get; set; }
 
     [Required]
     [Column(TypeName = "decimal(10,2)")] // Garante a precisão correta no banco
@@ -48,10 +50,6 @@ public class Categoria
 
     public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
 
-    // --- Navegação ---
-
-    [ForeignKey("IdEvento")]
-    public virtual Evento Evento { get; set; }
 
     [ForeignKey("IdModalidade")]
     public virtual Modalidade Modalidade { get; set; }

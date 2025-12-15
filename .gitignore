@@ -25,6 +25,7 @@ artifacts/
 **/iOS/**/[Oo]bj/
 **/iOS/**/[Bb]in/
 # Arquivos de configuração sensíveis
+appsettings.json
 appsettings.Development.json
 appsettings.Production.json
 **/secrets.json

@@ -1,15 +1,20 @@
 ﻿using AutoMapper;
+using DevNationCrono.API.Data;
 using DevNationCrono.API.Exceptions;
 using DevNationCrono.API.Models.DTOs;
 using DevNationCrono.API.Models.Entities;
+using DevNationCrono.API.Repositories.Implementations;
 using DevNationCrono.API.Repositories.Interfaces;
 using DevNationCrono.API.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace DevNationCrono.API.Services.Implementations;
 public class EtapaService : IEtapaService
 {
+    private readonly ApplicationDbContext _context;
     private readonly IEtapaRepository _etapaRepository;
     private readonly IEventoRepository _eventoRepository;
+    private readonly ICategoriaRepository _categoriaRepository;
     private readonly IMapper _mapper;
     private readonly ILogger<EtapaService> _logger;
 
@@ -19,13 +24,17 @@ public class EtapaService : IEtapaService
     };
 
     public EtapaService(
+        ApplicationDbContext context,
         IEtapaRepository etapaRepository,
         IEventoRepository eventoRepository,
+        ICategoriaRepository categoriaRepository,
         IMapper mapper,
         ILogger<EtapaService> logger)
     {
+        _context = context;
         _etapaRepository = etapaRepository;
         _eventoRepository = eventoRepository;
+        _categoriaRepository = categoriaRepository;
         _mapper = mapper;
         _logger = logger;
     }
@@ -342,6 +351,68 @@ public class EtapaService : IEtapaService
         }
 
         etapa.Status = novoStatus;
+    }
+
+    public async Task<List<EtapaCategoriaDto>> GetCategoriasEtapaAsync(int idEtapa)
+    {
+        return await _context.EtapaCategorias
+            .Include(ec => ec.Categoria)
+            .Where(ec => ec.IdEtapa == idEtapa)
+            .OrderBy(ec => ec.OrdemLargada)
+            .Select(ec => new EtapaCategoriaDto
+            {
+                Id = ec.Id,
+                IdEtapa = ec.IdEtapa,
+                IdCategoria = ec.IdCategoria,
+                NomeCategoria = ec.Categoria.Nome,
+                SiglaCategoria = ec.Categoria.Sigla,
+                CorCategoria = ec.Categoria.Cor,
+                OrdemLargada = ec.OrdemLargada
+            })
+            .ToListAsync();
+    }
+
+    public async Task VincularCategoriaAsync(int idEtapa, int idCategoria, int ordemLargada = 0)
+    {
+        var etapa = await _etapaRepository.GetByIdAsync(idEtapa);
+        if (etapa == null)
+            throw new NotFoundException("Etapa não encontrada");
+
+        var categoria = await _categoriaRepository.GetByIdAsync(idCategoria);
+        if (categoria == null)
+            throw new NotFoundException("Categoria não encontrada");
+
+        // Validar que categoria é da mesma modalidade do evento
+        if (categoria.IdModalidade != etapa.Evento.IdModalidade)
+            throw new ValidationException("Categoria não é da mesma modalidade do evento");
+
+        // Verificar se já está vinculada
+        var existe = await _context.EtapaCategorias
+            .AnyAsync(ec => ec.IdEtapa == idEtapa && ec.IdCategoria == idCategoria);
+
+        if (existe)
+            throw new ValidationException("Categoria já está vinculada a esta etapa");
+
+        _context.EtapaCategorias.Add(new EtapaCategoria
+        {
+            IdEtapa = idEtapa,
+            IdCategoria = idCategoria,
+            OrdemLargada = ordemLargada
+        });
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DesvincularCategoriaAsync(int idEtapa, int idCategoria)
+    {
+        var vinculo = await _context.EtapaCategorias
+            .FirstOrDefaultAsync(ec => ec.IdEtapa == idEtapa && ec.IdCategoria == idCategoria);
+
+        if (vinculo == null)
+            throw new NotFoundException("Vínculo não encontrado");
+
+        _context.EtapaCategorias.Remove(vinculo);
+        await _context.SaveChangesAsync();
     }
 
     private EtapaDto MapearParaDto(Etapa etapa)

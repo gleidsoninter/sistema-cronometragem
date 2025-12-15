@@ -1,14 +1,17 @@
-﻿using DevNationCrono.API.Exceptions;
+﻿using DevNationCrono.API.Data;
+using DevNationCrono.API.Exceptions;
 using DevNationCrono.API.Models.DTOs;
 using DevNationCrono.API.Models.Entities;
 using DevNationCrono.API.Repositories.Interfaces;
 using DevNationCrono.API.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace DevNationCrono.API.Services.Implementations;
 
 public class ResultadoCircuitoService : IResultadoCircuitoService
 {
+    private readonly ApplicationDbContext _context;
     private readonly ITempoRepository _tempoRepository;
     private readonly IEtapaRepository _etapaRepository;
     private readonly IInscricaoRepository _inscricaoRepository;
@@ -21,12 +24,14 @@ public class ResultadoCircuitoService : IResultadoCircuitoService
     private static readonly TimeSpan CACHE_COMPLETO = TimeSpan.FromSeconds(30);
 
     public ResultadoCircuitoService(
+        ApplicationDbContext context,
         ITempoRepository tempoRepository,
         IEtapaRepository etapaRepository,
         IInscricaoRepository inscricaoRepository,
         IMemoryCache cache,
         ILogger<ResultadoCircuitoService> logger)
     {
+        _context = context;
         _tempoRepository = tempoRepository;
         _etapaRepository = etapaRepository;
         _inscricaoRepository = inscricaoRepository;
@@ -56,8 +61,16 @@ public class ResultadoCircuitoService : IResultadoCircuitoService
         if (etapa.Evento.Modalidade.TipoCronometragem != "CIRCUITO")
             throw new ValidationException("Esta etapa não é de CIRCUITO");
 
-        // 2. Buscar inscrições
+        var categoriasEtapa = await _context.EtapaCategorias
+            .Where(ec => ec.IdEtapa == idEtapa)
+            .Select(ec => ec.IdCategoria)
+            .ToListAsync();
+
+        // Filtrar inscrições apenas das categorias desta etapa
         var inscricoes = await _inscricaoRepository.GetByEtapaAsync(idEtapa);
+        inscricoes = inscricoes
+            .Where(i => categoriasEtapa.Contains(i.IdCategoria))
+            .ToList();
 
         // 3. Buscar todas as passagens
         var todasPassagens = await _tempoRepository.GetByEtapaAsync(idEtapa);
@@ -147,6 +160,20 @@ public class ResultadoCircuitoService : IResultadoCircuitoService
         _cache.Set(cacheKey, classificacao, CACHE_COMPLETO);
 
         return classificacao;
+    }
+
+    public async Task<List<CategoriaResumoDto>> GetCategoriasEtapaAsync(int idEtapa)
+    {
+        return await _context.EtapaCategorias
+            .Where(ec => ec.IdEtapa == idEtapa)
+            .OrderBy(ec => ec.OrdemLargada)
+            .Select(ec => new CategoriaResumoDto
+            {
+                Id = ec.Categoria.Id,
+                Nome = ec.Categoria.Nome,
+                // Sigla = ec.Categoria.Sigla // se existir no DTO
+            })
+            .ToListAsync();
     }
 
     #endregion
